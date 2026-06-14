@@ -11,6 +11,7 @@ import {
   X,
   ChevronRight,
   Bus,
+  Ticket,
 } from "lucide-react";
 
 const navItems = [
@@ -18,6 +19,7 @@ const navItems = [
   { to: "/passenger-view", label: "Pasajeros", icon: Users, end: false },
   { to: "/driver-view", label: "Conductores", icon: Truck, end: false },
   { to: "/vehicle-view", label: "Vehículos", icon: Bus, end: false },
+  { to: "/ticket-price", label: "Precio de Pasaje", icon: Ticket, end: false },
   { to: "/routes-view", label: "Rutas", icon: Map, end: false },
   { to: "/usuarios/nuevo", label: "Crear Usuarios", icon: Users, end: false },
 ];
@@ -97,9 +99,6 @@ export default function Layout() {
                 {!collapsed && (
                   <>
                     <span className="flex-1">{item.label}</span>
-                    {isActive && (
-                      <ChevronRight className="w-4 h-4 text-[#2D1E2F]" />
-                    )}
                   </>
                 )}
               </>

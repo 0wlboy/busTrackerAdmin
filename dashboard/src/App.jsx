@@ -16,6 +16,7 @@ import {
   AddUser,
   VehicleView,
   AddVehicule,
+  TicketPrice,
 } from "./pages/(auth)/exporter";
 
 /**
@@ -65,6 +66,7 @@ function App() {
             <Route path="/usuarios/nuevo" element={<AddUser />} />
             <Route path="/vehicle-view" element={<VehicleView />} />
             <Route path="/vehiculos/nuevo" element={<AddVehicule />} />
+            <Route path="/ticket-price" element={<TicketPrice />} />
           </Route>
 
           {/* Redirección para cualquier otra ruta no encontrada (404) */}
