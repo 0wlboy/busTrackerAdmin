@@ -8,7 +8,9 @@ import {
   getCountFromServer,
   startAfter,
   endBefore,
-  limitToLast
+  limitToLast,
+  doc,
+  getDoc
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 
@@ -33,6 +35,51 @@ export function usePaginatedVehicles({
   const [currentPage, setCurrentPage] = useState(1);
   const [firstVisible, setFirstVisible] = useState(null);
   const [lastVisible, setLastVisible] = useState(null);
+
+  // Mapeo de cédulas de conductores
+  const [cedulas, setCedulas] = useState({});
+
+  useEffect(() => {
+    const fetchCedulas = async () => {
+      if (!vehicles || vehicles.length === 0) return;
+      
+      const newCedulas = { ...cedulas };
+      let updated = false;
+
+      for (const v of vehicles) {
+        const dId = v.driverId;
+        if (dId && !newCedulas[dId]) {
+          try {
+            // Intentar primero en la colección "users"
+            const docRef = doc(db, "users", dId);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+              newCedulas[dId] = docSnap.data().cedula || "Sin cédula";
+            } else {
+              // Intentar en la colección "driver" como fallback / opción indicada en la solicitud
+              const driverRef = doc(db, "driver", dId);
+              const driverSnap = await getDoc(driverRef);
+              if (driverSnap.exists()) {
+                newCedulas[dId] = driverSnap.data().cedula || "Sin cédula";
+              } else {
+                newCedulas[dId] = "No encontrado";
+              }
+            }
+          } catch (err) {
+            console.error(`Error al obtener cédula del conductor ${dId}:`, err);
+            newCedulas[dId] = "Error";
+          }
+          updated = true;
+        }
+      }
+
+      if (updated) {
+        setCedulas(newCedulas);
+      }
+    };
+
+    fetchCedulas();
+  }, [vehicles]);
 
   // Derivados
   const isFirstPage = currentPage === 1;
@@ -137,5 +184,6 @@ export function usePaginatedVehicles({
     nextPage,
     prevPage,
     refresh,
+    cedulas,
   };
 }

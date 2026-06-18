@@ -46,6 +46,7 @@ export function useAddUser() {
         email: userData.email,
         role: userData.role,
         phone: userData.phone || "",
+        cedula: userData.cedula || "",
         status: userData.status || "active",
         createdAt: new Date().toISOString(),
       };

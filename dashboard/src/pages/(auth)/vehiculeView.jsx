@@ -27,6 +27,7 @@ export default function VehicleView() {
     isLastPage,
     nextPage,
     prevPage,
+    cedulas = {},
   } = usePaginatedVehicles({
     pageSize: 10,
     orderByField: "createdAt",
@@ -37,10 +38,12 @@ export default function VehicleView() {
   const filtered = vehicles.filter((v) => {
     const route = v.routeId || v.route || "Sin ruta";
     const driverId = v.driverId || "Sin conductor";
+    const cedula = cedulas[v.driverId] || "";
 
     const matchSearch =
       route.toLowerCase().includes(search.toLowerCase()) ||
-      driverId.toLowerCase().includes(search.toLowerCase());
+      driverId.toLowerCase().includes(search.toLowerCase()) ||
+      cedula.toLowerCase().includes(search.toLowerCase());
 
     return matchSearch;
   });
@@ -50,7 +53,7 @@ export default function VehicleView() {
     doc.text("Reporte de Vehículos", 14, 15);
 
     // Preparar los datos
-    const tableColumn = ["ID", "Ruta", "Asientos", "Conductor ID"];
+    const tableColumn = ["ID", "Ruta", "Asientos", "Cédula"];
     const tableRows = [];
 
     filtered.forEach((vehicle) => {
@@ -58,7 +61,7 @@ export default function VehicleView() {
         vehicle.id || "Sin ID",
         vehicle.routeId || "Sin ruta",
         vehicle.seats || "Sin asientos",
-        vehicle.driverId || "Sin conductor",
+        cedulas[vehicle.driverId] || "Sin cédula",
         vehicle.createdAt
           ? new Date(
               vehicle.createdAt.seconds
@@ -165,7 +168,7 @@ export default function VehicleView() {
                   Asientos
                 </th>
                 <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
-                  Conductor ID
+                  Cédula
                 </th>
                 <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
                   Registrado
@@ -217,7 +220,7 @@ export default function VehicleView() {
                       </td>
                       <td className="px-5 py-4 text-[#2D1E2F]/50 text-sm">
                         <span className="text-xs font-mono bg-[#2D1E2F]/5 px-2 py-1 rounded">
-                          {v.driverId || "N/A"}
+                          {cedulas[v.driverId] || (loading ? "Cargando..." : "N/A")}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-[#2D1E2F]/50 text-sm">

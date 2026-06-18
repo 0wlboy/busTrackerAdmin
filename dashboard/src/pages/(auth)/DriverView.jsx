@@ -54,10 +54,12 @@ export default function DriverView() {
   const filtered = users.filter((u) => {
     const userName = u.name || "Sin nombre";
     const userEmail = u.email || "Sin correo";
+    const userCedula = u.cedula || "";
 
     const matchSearch =
       userName.toLowerCase().includes(search.toLowerCase()) ||
-      userEmail.toLowerCase().includes(search.toLowerCase());
+      userEmail.toLowerCase().includes(search.toLowerCase()) ||
+      userCedula.toLowerCase().includes(search.toLowerCase());
 
     const matchStatus =
       filterStatus === "Todos" ||
@@ -75,6 +77,7 @@ export default function DriverView() {
     // Preparar los datos
     const tableColumn = [
       "Usuario",
+      "Cédula",
       "Correo",
       "Conexión",
       "Estado",
@@ -86,6 +89,7 @@ export default function DriverView() {
     filtered.forEach((user) => {
       const userData = [
         user.name || "Sin nombre",
+        user.cedula || "N/A",
         user.email || "Sin correo",
         user.isOnline ? "Conectado" : "Desconectado",
         user.status === "active" ? "Activo" : "Inactivo",
@@ -249,6 +253,9 @@ export default function DriverView() {
                   Usuario
                 </th>
                 <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
+                  Cédula
+                </th>
+                <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
                   Conexión
                 </th>
                 <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
@@ -266,7 +273,7 @@ export default function DriverView() {
               {!loading && filtered.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="text-center text-[#2D1E2F]/40 py-12 text-sm"
                   >
                     No se encontraron conductores en esta página
@@ -306,6 +313,11 @@ export default function DriverView() {
                             </p>
                           </div>
                         </div>
+                      </td>
+                      <td className="px-5 py-4 text-[#2D1E2F]/50 text-sm">
+                        <span className="text-xs font-mono bg-[#2D1E2F]/5 px-2 py-1 rounded">
+                          {user.cedula || "N/A"}
+                        </span>
                       </td>
                       <td className="px-5 py-4">
                         <span

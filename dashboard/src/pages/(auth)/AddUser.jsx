@@ -10,6 +10,7 @@ export default function AddUser() {
   const [form, setForm] = useState({
     name: "",
     email: "",
+    cedula: "",
     role: "",
     status: "active",
     password: "",
@@ -22,14 +23,52 @@ export default function AddUser() {
 
   const validate = () => {
     const e = {};
-    if (!form.name.trim()) e.name = "El nombre es requerido";
-    if (!form.email.trim()) e.email = "El correo es requerido";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      e.email = "Correo inválido";
-    if (!form.password) e.password = "La contraseña es requerida";
-    else if (form.password.length < 6) e.password = "Mínimo 6 caracteres";
-    if (form.password !== form.confirmPassword)
+
+    // Expresiones regulares de validación
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const cedulaRegex = /^\d+$/;
+    const passwordRegex = /^.{6,}$/;
+    const phoneRegex = /^\+?[0-9\s\-]{7,15}$/;
+
+    // Nombre completo
+    if (!form.name.trim()) {
+      e.name = "El nombre es requerido";
+    } else if (!nameRegex.test(form.name.trim())) {
+      e.name = "El nombre debe contener únicamente letras y espacios";
+    }
+
+    // Correo electrónico
+    if (!form.email.trim()) {
+      e.email = "El correo es requerido";
+    } else if (!emailRegex.test(form.email.trim())) {
+      e.email = "El correo no es válido";
+    }
+
+    // Cédula
+    if (!form.cedula.trim()) {
+      e.cedula = "La cédula es requerida";
+    } else if (!cedulaRegex.test(form.cedula.trim())) {
+      e.cedula = "La cédula debe contener únicamente números";
+    }
+
+    // Teléfono (opcional, pero si se ingresa se valida)
+    if (form.phone.trim() && !phoneRegex.test(form.phone.trim())) {
+      e.phone = "El teléfono debe ser válido (7-15 dígitos, opcional +)";
+    }
+
+    // Contraseña
+    if (!form.password) {
+      e.password = "La contraseña es requerida";
+    } else if (!passwordRegex.test(form.password)) {
+      e.password = "La contraseña debe tener al menos 6 caracteres";
+    }
+
+    // Confirmar contraseña
+    if (form.password !== form.confirmPassword) {
       e.confirmPassword = "Las contraseñas no coinciden";
+    }
+
     return e;
   };
 
@@ -167,6 +206,22 @@ export default function AddUser() {
             )}
           </div>
 
+          <div className="sm:col-span-2">
+            <label className="block text-[#2D1E2F] text-sm mb-1.5">
+              Cédula *
+            </label>
+            <input
+              type="text"
+              value={form.cedula}
+              onChange={(e) => set("cedula", e.target.value.replace(/\D/g, ""))}
+              placeholder="Ej. 12345678"
+              className={inputClass(!!errors.cedula)}
+            />
+            {errors.cedula && (
+              <p className="text-red-500 text-xs mt-1">{errors.cedula}</p>
+            )}
+          </div>
+
           <div>
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
               Teléfono
@@ -176,8 +231,11 @@ export default function AddUser() {
               value={form.phone}
               onChange={(e) => set("phone", e.target.value)}
               placeholder="+1 234 567 8900"
-              className={inputClass(false)}
+              className={inputClass(!!errors.phone)}
             />
+            {errors.phone && (
+              <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+            )}
           </div>
 
           <div>

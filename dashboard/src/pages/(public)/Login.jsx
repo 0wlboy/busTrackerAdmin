@@ -30,6 +30,22 @@ export default function Login() {
       return;
     }
 
+    // Expresiones regulares de validación
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordRegex = /^.{6,}$/;
+
+    if (!emailRegex.test(email.trim())) {
+      setError("El correo electrónico no es válido.");
+      setLoading(false);
+      return;
+    }
+
+    if (!passwordRegex.test(password)) {
+      setError("La contraseña debe tener al menos 6 caracteres.");
+      setLoading(false);
+      return;
+    }
+
     try {
       await login(email, password);
       // El login fue exitoso, no necesitamos quitar el loading porque nos vamos de la página

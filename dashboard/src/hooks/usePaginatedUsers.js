@@ -86,7 +86,12 @@ export function usePaginatedUsers({
 
       const usersData = [];
       snapshot.forEach((doc) => {
-        usersData.push({ id: doc.id, ...doc.data() });
+        const data = doc.data();
+        usersData.push({
+          id: doc.id,
+          cedula: data.cedula || "",
+          ...data,
+        });
       });
 
       setUsers(usersData);
