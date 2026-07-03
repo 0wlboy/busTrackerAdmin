@@ -22,7 +22,7 @@ const navItems = [
   { to: "/vehicle-view", label: "Vehículos", icon: Bus, end: false },
   { to: "/ticket-price", label: "Precio de Pasaje", icon: Ticket, end: false },
   { to: "/routes-view", label: "Rutas", icon: Map, end: false },
-  { to: "/maps", label: "Mapa en Vivo", icon: Navigation2, end: false },
+  { to: "/maps", label: "Mapa", icon: Navigation2, end: false },
   { to: "/usuarios/nuevo", label: "Crear Usuarios", icon: Users, end: false },
 ];
 
