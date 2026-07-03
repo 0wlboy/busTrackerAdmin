@@ -83,8 +83,19 @@ export function useGetRoutes() {
     fetchRoutes();
   }, [fetchRoutes]);
 
+  /**
+   * Lista ligera derivada: solo { id, name } por cada ruta.
+   * Útil para construir filtros/botones sin necesidad de
+   * una consulta adicional a Firestore.
+   */
+  const routeList = routes.map((r) => ({
+    id: r.id,
+    name: r.name ?? r.id,
+  }));
+
   return {
-    routes,
+    routes,      // Array completo con totalVehicles, activeVehicles, etc.
+    routeList,   // Array ligero { id, name } para filtros de UI
     loading,
     error,
     refresh: fetchRoutes,

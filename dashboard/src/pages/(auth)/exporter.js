@@ -7,4 +7,5 @@ export { default as AddUser } from "./AddUser";
 export { default as AddVehicule } from "./AddVehicule";
 export { default as VehicleView } from "./vehiculeView";
 export { default as TicketPrice } from "./TicketPrice";
+export { default as Maps } from "./Maps";
 

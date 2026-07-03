@@ -24,6 +24,7 @@ export default function AddVehicule() {
   const [form, setForm] = useState({
     driverId: "",
     routeId: "",
+    plate: "",
     seats: "",
     imageFile: null,
   });
@@ -212,6 +213,26 @@ export default function AddVehicule() {
               El usuario debe existir y tener el rol de conductor.
             </p>
             {errors.driverId && (
+              <p className="text-red-500 text-xs mt-1">{errors.driverId}</p>
+            )}
+          </div>
+
+          {/* Plate */}
+          <div className="sm:col-span-2">
+            <label className="block text-[#2D1E2F] text-sm mb-1.5">
+              Placa del Vehiculo *
+            </label>
+            <input
+              type="text"
+              value={form.plate}
+              onChange={(e) => setField("plate", e.target.value)}
+              placeholder="Escribe la placa del vehiculo..."
+              className={inputClass(!!errors.plate)}
+            />
+            <p className="text-[#2D1E2F]/40 text-xs mt-1">
+              La placa del vehiculo.
+            </p>
+            {errors.plate && (
               <p className="text-red-500 text-xs mt-1">{errors.driverId}</p>
             )}
           </div>

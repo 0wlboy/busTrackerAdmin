@@ -8,7 +8,7 @@ export function useAddVehicle() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const addVehicle = async ({ imgFile, driverId, routeId, seats }) => {
+  const addVehicle = async ({ imgFile, driverId, routeId, plate, seats }) => {
     setLoading(true);
     setError(null);
 
@@ -46,22 +46,22 @@ export function useAddVehicle() {
       // 3. Crear documento de vehículo (el ID del documento es el driverId)
       const vehicleRef = doc(db, "vehicles", driverId);
       await setDoc(vehicleRef, {
-        driverId,
-        imageUrl,
-        routeId,
+        driverId: driverId,
+        imageUri: imageUrl,
+        routeId: routeId,
+        plate: plate,
         seats: Number(seats),
         createdAt: serverTimestamp(),
         modifiedAt: serverTimestamp(),
       });
-      /*
       // 3. Inicializar el documento de tracking para el conductor
       const trackingRef = doc(db, "tracking", driverId);
       await setDoc(trackingRef, {
-        driverId,
+        driverId: driverId,
         online: false,
         location: null,
+        lastUpdated: serverTimestamp(),
       });
-*/
       return { success: true };
     } catch (err) {
       console.error("Error al agregar vehículo:", err);

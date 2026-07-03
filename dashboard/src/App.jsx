@@ -17,6 +17,7 @@ import {
   VehicleView,
   AddVehicule,
   TicketPrice,
+  Maps,
 } from "./pages/(auth)/exporter";
 
 /**
@@ -67,6 +68,7 @@ function App() {
             <Route path="/vehicle-view" element={<VehicleView />} />
             <Route path="/vehiculos/nuevo" element={<AddVehicule />} />
             <Route path="/ticket-price" element={<TicketPrice />} />
+            <Route path="/maps" element={<Maps />} />
           </Route>
 
           {/* Redirección para cualquier otra ruta no encontrada (404) */}
