@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -31,6 +31,22 @@ export default function Layout() {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Auto-colapsar cuando el ancho de la ventana baja de 1024 px
+  useEffect(() => {
+    const BREAKPOINT = 1024;
+    const handleResize = () => {
+      if (window.innerWidth < BREAKPOINT) {
+        setCollapsed(true);
+      } else {
+        setCollapsed(false);
+      }
+    };
+    // Ejecutar al montar por primera vez
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleLogout = async () => {
     try {
