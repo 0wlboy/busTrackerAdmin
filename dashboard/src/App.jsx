@@ -5,6 +5,7 @@ import Layout from "./components/Layout";
 
 // Public pages
 import Login from "./pages/(public)/login";
+import PasswordRecovery from "./pages/(public)/PasswordRecovery";
 
 // Protected pages (auth)
 import {
@@ -42,6 +43,7 @@ function App() {
               RUTAS PÚBLICAS
               ======================= */}
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<PasswordRecovery />} />
 
           {/* =======================
               RUTAS PROTEGIDAS (AUTH)
