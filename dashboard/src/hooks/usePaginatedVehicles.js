@@ -11,7 +11,7 @@ import {
   limitToLast,
   doc,
   getDoc,
-  where
+  where,
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 
@@ -44,7 +44,7 @@ export function usePaginatedVehicles({
   useEffect(() => {
     const fetchCedulas = async () => {
       if (!vehicles || vehicles.length === 0) return;
-      
+
       const newCedulas = { ...cedulas };
       let updated = false;
 
@@ -85,7 +85,10 @@ export function usePaginatedVehicles({
 
   // Derivados
   const isFirstPage = currentPage === 1;
-  const isLastPage = vehicles.length === 0 || vehicles.length < pageSize || (currentPage * pageSize >= totalCount && totalCount > 0);
+  const isLastPage =
+    vehicles.length === 0 ||
+    vehicles.length < pageSize ||
+    (currentPage * pageSize >= totalCount && totalCount > 0);
 
   // Helper para construir la query base
   const buildBaseQuery = useCallback(() => {
@@ -134,13 +137,11 @@ export function usePaginatedVehicles({
       const vehiclesSnap = await getDocs(query(vehiclesRef));
 
       const registeredDriverIds = new Set(
-        vehiclesSnap.docs
-          .map((d) => d.data().driverId)
-          .filter(Boolean)
+        vehiclesSnap.docs.map((d) => d.data().driverId).filter(Boolean),
       );
 
       const activeCount = onlineDriverIds.filter((id) =>
-        registeredDriverIds.has(id)
+        registeredDriverIds.has(id),
       ).length;
 
       setActiveVehicleCount(activeCount);
@@ -156,10 +157,32 @@ export function usePaginatedVehicles({
     try {
       const snapshot = await getDocs(q);
 
-      const vehiclesData = [];
-      snapshot.forEach((doc) => {
-        vehiclesData.push({ id: doc.id, ...doc.data() });
-      });
+      // Enriquecer cada vehículo con el nombre de su ruta
+      // La propiedad routeId del vehículo es el ID del documento en "vehicleRoutes"
+      const vehiclesData = await Promise.all(
+        snapshot.docs.map(async (vehicleDoc) => {
+          const vehicleData = vehicleDoc.data();
+          let routeName = null;
+
+          if (vehicleData.routeId) {
+            try {
+              const routeDocRef = doc(db, "vehicleRoutes", vehicleData.routeId);
+              const routeSnap = await getDoc(routeDocRef);
+              if (routeSnap.exists()) {
+                routeName = routeSnap.data().name ?? null;
+              }
+            } catch (_) {
+              // Si falla la carga de ruta, se deja null
+            }
+          }
+
+          return {
+            id: vehicleDoc.id,
+            ...vehicleData,
+            routeName,
+          };
+        }),
+      );
 
       setVehicles(vehiclesData);
 
@@ -174,7 +197,7 @@ export function usePaginatedVehicles({
       console.error("Error ejecutando la consulta de vehiculos:", err);
       if (err.message && err.message.includes("The query requires an index")) {
         console.warn(
-          "ATENCIÓN: Necesitas crear un índice compuesto en Firebase. Revisa la consola y haz clic en el enlace proporcionado por Firebase para crearlo."
+          "ATENCIÓN: Necesitas crear un índice compuesto en Firebase. Revisa la consola y haz clic en el enlace proporcionado por Firebase para crearlo.",
         );
       }
       setError(err);
@@ -201,7 +224,11 @@ export function usePaginatedVehicles({
   // Navegar a la página anterior
   const prevPage = () => {
     if (!firstVisible || isFirstPage) return;
-    const q = query(buildBaseQuery(), endBefore(firstVisible), limitToLast(pageSize));
+    const q = query(
+      buildBaseQuery(),
+      endBefore(firstVisible),
+      limitToLast(pageSize),
+    );
     setCurrentPage((prev) => prev - 1);
     executeQuery(q);
   };

@@ -17,33 +17,7 @@ import CustomTooltip from "../../components/UI/CustomTooltip";
 import { usePaginatedVehicles } from "../../hooks/usePaginatedVehicles";
 import { usePaginatedUsers } from "../../hooks/usePaginatedUsers";
 import { useGetRoutes } from "../../hooks/useGetRoutes";
-
-const hourlyData = [
-  { hora: "08:00", sesiones: 12 },
-  { hora: "09:00", sesiones: 28 },
-  { hora: "10:00", sesiones: 42 },
-  { hora: "11:00", sesiones: 55 },
-  { hora: "12:00", sesiones: 48 },
-  { hora: "13:00", sesiones: 35 },
-  { hora: "14:00", sesiones: 60 },
-  { hora: "15:00", sesiones: 72 },
-  { hora: "16:00", sesiones: 65 },
-  { hora: "17:00", sesiones: 58 },
-  { hora: "18:00", sesiones: 45 },
-  { hora: "19:00", sesiones: 30 },
-  { hora: "20:00", sesiones: 18 },
-  { hora: "21:00", sesiones: 10 },
-];
-
-const weeklyData = [
-  { dia: "Lun", usuarios: 45, vehiculos: 28 },
-  { dia: "Mar", usuarios: 52, vehiculos: 32 },
-  { dia: "Mié", usuarios: 48, vehiculos: 30 },
-  { dia: "Jue", usuarios: 61, vehiculos: 38 },
-  { dia: "Vie", usuarios: 58, vehiculos: 35 },
-  { dia: "Sáb", usuarios: 30, vehiculos: 20 },
-  { dia: "Dom", usuarios: 22, vehiculos: 15 },
-];
+import { useGetTracking } from "../../hooks/useGetTracking";
 
 export default function Home() {
   //const { currentUser } = useAuth();
@@ -59,10 +33,69 @@ export default function Home() {
     totalPassengers,
     activePassengersCount: activePassengers,
     activeDriversCount: activeDrivers,
+    activeUsersList,
+    hourlyActiveUsers: hourlyData,
   } = usePaginatedUsers();
 
   // Obtener rutas de Firestore
   const { routes: dbRoutes, topRoute } = useGetRoutes();
+
+  // Obtener los vehículos en seguimiento que están online
+  const { buses: trackingBuses } = useGetTracking();
+
+  // Función para obtener el día de la semana abreviado ("Lun", "Mar", etc.) de una fecha o timestamp
+  const getDayOfWeek = (dateVal) => {
+    if (!dateVal) return null;
+    let date;
+    if (dateVal.seconds) {
+      date = new Date(dateVal.seconds * 1000);
+    } else if (dateVal.toDate) {
+      date = dateVal.toDate();
+    } else {
+      date = new Date(dateVal);
+    }
+    if (isNaN(date.getTime())) return null;
+
+    const days = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+    return days[date.getDay()];
+  };
+
+  // Agrupar usuarios y vehículos por día de la semana
+  const weeklyData = [
+    { dia: "Lun", usuarios: 0, vehiculos: 0 },
+    { dia: "Mar", usuarios: 0, vehiculos: 0 },
+    { dia: "Mié", usuarios: 0, vehiculos: 0 },
+    { dia: "Jue", usuarios: 0, vehiculos: 0 },
+    { dia: "Vie", usuarios: 0, vehiculos: 0 },
+    { dia: "Sáb", usuarios: 0, vehiculos: 0 },
+    { dia: "Dom", usuarios: 0, vehiculos: 0 },
+  ];
+
+  // Sumar usuarios activos
+  if (Array.isArray(activeUsersList)) {
+    activeUsersList.forEach((user) => {
+      const day = getDayOfWeek(user.lastLogin) || getDayOfWeek(new Date());
+      if (day) {
+        const target = weeklyData.find((d) => d.dia === day);
+        if (target) {
+          target.usuarios += 1;
+        }
+      }
+    });
+  }
+
+  // Sumar vehículos activos
+  if (Array.isArray(trackingBuses)) {
+    trackingBuses.forEach((bus) => {
+      const day = getDayOfWeek(bus.lastUpdated) || getDayOfWeek(new Date());
+      if (day) {
+        const target = weeklyData.find((d) => d.dia === day);
+        if (target) {
+          target.vehiculos += 1;
+        }
+      }
+    });
+  }
 
   const topRouteName = topRoute ? topRoute.name || topRoute.id : "Ninguna";
   const topRouteVehicles = topRoute ? topRoute.activeVehicles : 0;

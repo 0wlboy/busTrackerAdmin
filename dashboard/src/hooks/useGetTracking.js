@@ -147,6 +147,7 @@ export function useGetTracking() {
             lat,
             lng,
             online: data.online ?? data.isTracking ?? false,
+            lastUpdated: data.lastUpdated ?? null,
             vehicle,
             route,
           };

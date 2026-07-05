@@ -38,6 +38,8 @@ export function usePaginatedUsers({
   const [totalPassengers, setTotalPassengers] = useState(0);
   const [activePassengersCount, setActivePassengersCount] = useState(0);
   const [activeDriversCount, setActiveDriversCount] = useState(0);
+  const [activeUsersList, setActiveUsersList] = useState([]);
+  const [hourlyActiveUsers, setHourlyActiveUsers] = useState([]);
 
   // Estados de paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -127,19 +129,58 @@ export function usePaginatedUsers({
 
       let passengers = 0;
       let drivers = 0;
+      const usersList = [];
+
+      // Inicializar las 24 horas del día
+      const hourlyCounts = Array.from({ length: 24 }, (_, i) => {
+        const hourStr = String(i).padStart(2, "0") + ":00";
+        return { hora: hourStr, sesiones: 0 };
+      });
+
+      const today = new Date();
 
       snapshot.forEach((docSnap) => {
         const data = docSnap.data();
+        usersList.push({
+          id: docSnap.id,
+          ...data
+        });
         const userRole = (data.role || "").toLowerCase();
         if (userRole === "pasajero" || userRole === "supervisor") {
           passengers++;
         } else if (userRole === "conductor" || userRole === "operador") {
           drivers++;
         }
+
+        // Agrupar por hora si fue logueado/actualizado hoy
+        if (data.lastLogin) {
+          let loginDate;
+          if (data.lastLogin.seconds) {
+            loginDate = new Date(data.lastLogin.seconds * 1000);
+          } else if (data.lastLogin.toDate) {
+            loginDate = data.lastLogin.toDate();
+          } else {
+            loginDate = new Date(data.lastLogin);
+          }
+
+          if (!isNaN(loginDate.getTime())) {
+            const isToday =
+              loginDate.getDate() === today.getDate() &&
+              loginDate.getMonth() === today.getMonth() &&
+              loginDate.getFullYear() === today.getFullYear();
+
+            if (isToday) {
+              const hour = loginDate.getHours(); // 0 a 23
+              hourlyCounts[hour].sesiones += 1;
+            }
+          }
+        }
       });
 
       setActivePassengersCount(passengers);
       setActiveDriversCount(drivers);
+      setActiveUsersList(usersList);
+      setHourlyActiveUsers(hourlyCounts);
     } catch (err) {
       console.error("Error al obtener los conteos de usuarios activos:", err);
     }
@@ -236,6 +277,8 @@ export function usePaginatedUsers({
     totalPassengers,
     activePassengersCount,
     activeDriversCount,
+    activeUsersList,
+    hourlyActiveUsers,
     currentPage,
     isFirstPage,
     isLastPage,
