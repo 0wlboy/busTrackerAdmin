@@ -78,7 +78,6 @@ export default function DriverView() {
       "Cédula",
       "Correo",
       "Conexión",
-      "Estado",
       "Registrado",
       "Último acceso",
     ];
