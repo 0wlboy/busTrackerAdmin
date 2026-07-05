@@ -138,7 +138,7 @@ export default function AddVehicule() {
   const inputClass = (hasError) =>
     `w-full bg-[#FFF9D6] border text-[#2D1E2F] placeholder-[#2D1E2F]/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${
       hasError
-        ? "border-red-400 focus:border-red-400 focus:ring-red-200"
+        ? "border-[#EF4444] focus:border-[#EF4444] focus:ring-[#EF4444]/20"
         : "border-[#2D1E2F]/15 focus:border-[#EFCC01] focus:ring-[#EFCC01]/20"
     }`;
 
@@ -222,8 +222,8 @@ export default function AddVehicule() {
               className="hidden"
             />
             {errors.imageFile && (
-              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
-                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+              <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                 <div>
                   <span className="font-semibold block">Alerta en foto del vehículo</span>
                   <span>{errors.imageFile}</span>
@@ -248,8 +248,8 @@ export default function AddVehicule() {
               El usuario debe existir y tener el rol de conductor.
             </p>
             {errors.driverId && (
-              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
-                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+              <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                 <div>
                   <span className="font-semibold block">Alerta en ID del Conductor</span>
                   <span>{errors.driverId}</span>
@@ -274,8 +274,8 @@ export default function AddVehicule() {
               La placa del vehiculo.
             </p>
             {errors.plate && (
-              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
-                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+              <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                 <div>
                   <span className="font-semibold block">Alerta en placa del vehículo</span>
                   <span>{errors.plate}</span>
@@ -298,8 +298,8 @@ export default function AddVehicule() {
               className={inputClass(!!errors.seats)}
             />
             {errors.seats && (
-              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
-                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+              <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                 <div>
                   <span className="font-semibold block">Alerta en cantidad de asientos</span>
                   <span>{errors.seats}</span>
@@ -332,8 +332,8 @@ export default function AddVehicule() {
               )}
             </select>
             {errors.routeId && (
-              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
-                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+              <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                 <div>
                   <span className="font-semibold block">Alerta en ruta</span>
                   <span>{errors.routeId}</span>

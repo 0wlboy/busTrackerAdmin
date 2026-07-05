@@ -131,11 +131,15 @@ export default function Login() {
                   setSubmitError("");
                 }}
                 placeholder="admin@empresa.com"
-                className="w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 text-[#2D1E2F] placeholder-[#2D1E2F]/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#EFCC01] focus:ring-2 focus:ring-[#EFCC01]/30 transition-all"
+                className={`w-full bg-[#FFF9D6] border text-[#2D1E2F] placeholder-[#2D1E2F]/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${
+                  errors.email
+                    ? "border-[#EF4444] focus:border-[#EF4444] focus:ring-[#EF4444]/20"
+                    : "border-[#2D1E2F]/15 focus:border-[#EFCC01] focus:ring-[#EFCC01]/30"
+                }`}
               />
               {errors.email && (
-                <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5 animate-fadeIn">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                   <div>
                     <span className="font-semibold block">Alerta en correo electrónico</span>
                     <span>{errors.email}</span>
@@ -158,7 +162,11 @@ export default function Login() {
                     setSubmitError("");
                   }}
                   placeholder="••••••••"
-                  className="w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 text-[#2D1E2F] placeholder-[#2D1E2F]/30 rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:border-[#EFCC01] focus:ring-2 focus:ring-[#EFCC01]/30 transition-all"
+                  className={`w-full bg-[#FFF9D6] border text-[#2D1E2F] placeholder-[#2D1E2F]/30 rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 transition-all ${
+                    errors.password
+                      ? "border-[#EF4444] focus:border-[#EF4444] focus:ring-[#EF4444]/20"
+                      : "border-[#2D1E2F]/15 focus:border-[#EFCC01] focus:ring-[#EFCC01]/30"
+                  }`}
                 />
                 <button
                   type="button"
@@ -173,8 +181,8 @@ export default function Login() {
                 </button>
               </div>
               {errors.password && (
-                <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5 animate-fadeIn">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                   <div>
                     <span className="font-semibold block">Alerta en contraseña</span>
                     <span>{errors.password}</span>
