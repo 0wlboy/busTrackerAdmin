@@ -7,7 +7,7 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { auth, db } from "../firebase/config";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 // Crear el contexto
 const AuthContext = createContext();
@@ -148,9 +148,33 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (email, password) => {
+  /**
+   * Registra un nuevo administrador en Firebase Auth y guarda sus datos en Firestore.
+   * @param {{ userName, email, password, cedula, phone }} userData
+   */
+  const register = async (userData) => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      // 1. Crear usuario en Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        userData.email,
+        userData.password,
+      );
+      const user = userCredential.user;
+
+      // 2. Guardar datos del admin en Firestore
+      const userDocRef = doc(db, "users", user.uid);
+      await setDoc(userDocRef, {
+        userName: userData.userName,
+        email: userData.email,
+        cedula: userData.cedula || "",
+        phone: userData.phone || "",
+        role: "admin",
+        isOnline: false,
+        createdAt: serverTimestamp(),
+      });
+
+      return { uid: user.uid };
     } catch (error) {
       throw error;
     }
