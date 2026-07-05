@@ -52,7 +52,7 @@ export default function DriverView() {
 
   // Filtramos en el cliente (búsqueda de texto y estado) sobre los resultados de la página actual
   const filtered = users.filter((u) => {
-    const userName = u.name || "Sin nombre";
+    const userName = u.userName || "Sin nombre";
     const userEmail = u.email || "Sin correo";
     const userCedula = u.cedula || "";
 
@@ -63,9 +63,7 @@ export default function DriverView() {
 
     const matchStatus =
       filterStatus === "Todos" ||
-      (filterStatus === "Activo"
-        ? u.status === "active"
-        : u.status === "inactive");
+      (filterStatus === "Activo" ? u.isOnline === true : u.isOnline === false);
 
     return matchSearch && matchStatus;
   });
@@ -80,7 +78,6 @@ export default function DriverView() {
       "Cédula",
       "Correo",
       "Conexión",
-      "Estado",
       "Registrado",
       "Último acceso",
     ];
@@ -88,11 +85,10 @@ export default function DriverView() {
 
     filtered.forEach((user) => {
       const userData = [
-        user.name || "Sin nombre",
+        user.userName || "Sin nombre",
         user.cedula || "N/A",
         user.email || "Sin correo",
         user.isOnline ? "Conectado" : "Desconectado",
-        user.status === "active" ? "Activo" : "Inactivo",
         user.createdAt
           ? new Date(
               user.createdAt.seconds
@@ -259,9 +255,6 @@ export default function DriverView() {
                   Conexión
                 </th>
                 <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
-                  Estado
-                </th>
-                <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
                   Registrado
                 </th>
                 <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
@@ -281,7 +274,7 @@ export default function DriverView() {
                 </tr>
               ) : (
                 filtered.map((user) => {
-                  const userName = user.name || "Sin nombre";
+                  const userName = user.userName || "Sin nombre";
                   const initials =
                     userName !== "Sin nombre"
                       ? userName
@@ -306,7 +299,7 @@ export default function DriverView() {
                           </div>
                           <div>
                             <p className="text-[#2D1E2F] text-sm font-medium">
-                              {userName}
+                              {user.userName}
                             </p>
                             <p className="text-[#2D1E2F]/40 text-xs">
                               {user.email || "Sin correo"}
@@ -331,18 +324,6 @@ export default function DriverView() {
                             className={`w-1.5 h-1.5 fill-current ${user.isOnline ? "text-green-500" : "text-[#2D1E2F]/30"}`}
                           />
                           {user.isOnline ? "Conectado" : "Desconectado"}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span
-                          className={`flex items-center gap-1.5 text-xs w-fit px-2.5 py-1 rounded-full ${
-                            user.status === "active"
-                              ? "bg-[#EFCC01]/25 text-[#2D1E2F] border border-[#EFCC01]/50"
-                              : "bg-[#2D1E2F]/8 text-[#2D1E2F]/40"
-                          }`}
-                        >
-                          <Circle className="w-1.5 h-1.5 fill-current" />
-                          {user.status === "active" ? "Activo" : "Inactivo"}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-[#2D1E2F]/50 text-sm">

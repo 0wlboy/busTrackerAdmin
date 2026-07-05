@@ -101,18 +101,12 @@ export function usePaginatedUsers({
       const usersRef = collection(db, "users");
 
       // Conductores
-      const driversQuery = query(
-        usersRef,
-        where("role", "in", ["Conductor", "conductor", "Operador", "operador"])
-      );
+      const driversQuery = query(usersRef, where("role", "==", "conductor"));
       const snapshotDrivers = await getCountFromServer(driversQuery);
       setTotalDrivers(snapshotDrivers.data().count);
 
       // Pasajeros
-      const passengersQuery = query(
-        usersRef,
-        where("role", "in", ["Pasajero", "pasajero", "Supervisor", "supervisor"])
-      );
+      const passengersQuery = query(usersRef, where("role", "==", "pasajero"));
       const snapshotPassengers = await getCountFromServer(passengersQuery);
       setTotalPassengers(snapshotPassengers.data().count);
     } catch (err) {
@@ -143,12 +137,12 @@ export function usePaginatedUsers({
         const data = docSnap.data();
         usersList.push({
           id: docSnap.id,
-          ...data
+          ...data,
         });
         const userRole = (data.role || "").toLowerCase();
-        if (userRole === "pasajero" || userRole === "supervisor") {
+        if (userRole === "pasajero") {
           passengers++;
-        } else if (userRole === "conductor" || userRole === "operador") {
+        } else if (userRole === "conductor") {
           drivers++;
         }
 
@@ -265,7 +259,13 @@ export function usePaginatedUsers({
   useEffect(() => {
     refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [buildBaseQuery, fetchTotalCount, fetchGlobalTotalUsers, fetchTotalUsersByRole, fetchActiveUsersCounts]);
+  }, [
+    buildBaseQuery,
+    fetchTotalCount,
+    fetchGlobalTotalUsers,
+    fetchTotalUsersByRole,
+    fetchActiveUsersCounts,
+  ]);
 
   return {
     users,
