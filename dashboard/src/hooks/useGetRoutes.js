@@ -93,9 +93,14 @@ export function useGetRoutes() {
     name: r.name ?? r.id,
   }));
 
+  const topRoute = routes.length > 0
+    ? [...routes].reduce((max, r) => (r.totalVehicles > max.totalVehicles ? r : max), routes[0])
+    : null;
+
   return {
     routes,      // Array completo con totalVehicles, activeVehicles, etc.
     routeList,   // Array ligero { id, name } para filtros de UI
+    topRoute,    // Ruta con más vehículos registrados
     loading,
     error,
     refresh: fetchRoutes,

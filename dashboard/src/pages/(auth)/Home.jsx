@@ -14,6 +14,9 @@ import {
 } from "recharts";
 import StatCard from "../../components/UI/StatCard";
 import CustomTooltip from "../../components/UI/CustomTooltip";
+import { usePaginatedVehicles } from "../../hooks/usePaginatedVehicles";
+import { usePaginatedUsers } from "../../hooks/usePaginatedUsers";
+import { useGetRoutes } from "../../hooks/useGetRoutes";
 
 const hourlyData = [
   { hora: "08:00", sesiones: 12 },
@@ -45,68 +48,54 @@ const weeklyData = [
 export default function Home() {
   //const { currentUser } = useAuth();
 
-  // Placeholder data
-  const usersLength = 120;
-  const activeUsers = 85;
-  const vehiclesLength = 45;
-  const activeVehicles = 32;
-  const topRouteName = "Ruta Norte - Centro";
-  const topRouteVehicles = 12;
+  // Conteos reales de vehículos desde Firestore
+  const { totalCount: vehiclesLength, activeVehicleCount: activeVehicles } =
+    usePaginatedVehicles();
 
-  const routes = [
-    {
-      id: 1,
-      name: "Ruta Norte - Centro",
-      activeVehicles: 12,
-      totalVehicles: 15,
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "Ruta Sur - Este",
-      activeVehicles: 8,
-      totalVehicles: 10,
-      status: "active",
-    },
-    {
-      id: 3,
-      name: "Ruta Perimetral",
-      activeVehicles: 5,
-      totalVehicles: 12,
-      status: "active",
-    },
-    {
-      id: 4,
-      name: "Ruta Nocturna",
-      activeVehicles: 0,
-      totalVehicles: 5,
-      status: "inactive",
-    },
-  ];
+  // Conteos reales de usuarios desde Firestore
+  const {
+    globalTotalUsers: totalUsers,
+    totalDrivers,
+    totalPassengers,
+    activePassengersCount: activePassengers,
+    activeDriversCount: activeDrivers,
+  } = usePaginatedUsers();
+
+  // Obtener rutas de Firestore
+  const { routes: dbRoutes, topRoute } = useGetRoutes();
+
+  const topRouteName = topRoute ? topRoute.name || topRoute.id : "Ninguna";
+  const topRouteVehicles = topRoute ? topRoute.activeVehicles : 0;
+
+  const routes = dbRoutes.map((r) => ({
+    id: r.id,
+    name: r.name || r.id,
+    activeVehicles: r.activeVehicles || 0,
+    totalVehicles: r.totalVehicles || 0,
+    status: r.status || (r.activeVehicles > 0 ? "active" : "inactive"),
+  }));
 
   const stats = [
     {
-      title: "Usuarios Registrados",
-      value: usersLength,
-      subtitle: "Total en el sistema",
+      title: "Conductores Activos",
+      value: activeDrivers,
+      subtitle: `De ${totalDrivers} registrados en el Sistema`,
       icon: <Users className="w-5 h-5 text-[#2D1E2F]" />,
       accent: false,
-      trend: "+2 este mes",
     },
     {
-      title: "Usuarios Activos",
-      value: activeUsers,
-      subtitle: `${Math.round((activeUsers / usersLength) * 100)}% del total`,
+      title: "Pasajeros Activos",
+      value: activePassengers,
+      subtitle: `De ${totalPassengers} registrados en el Sistema`,
       icon: <UserCheck className="w-5 h-5 text-[#EFCC01]" />,
       accent: true,
     },
     {
-      title: "Vehículos Registrados",
-      value: vehiclesLength,
-      subtitle: `${activeVehicles} activos ahora`,
+      title: "Vehículos Activos",
+      value: activeVehicles,
+      subtitle: `De ${vehiclesLength} Registrados en el Sistema`,
       icon: <Truck className="w-5 h-5 text-[#2D1E2F]" />,
       accent: false,
-      trend: "+1 esta semana",
     },
     {
       title: "Ruta con más vehículos",

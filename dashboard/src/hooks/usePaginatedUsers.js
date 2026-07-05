@@ -33,6 +33,11 @@ export function usePaginatedUsers({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
+  const [globalTotalUsers, setGlobalTotalUsers] = useState(0);
+  const [totalDrivers, setTotalDrivers] = useState(0);
+  const [totalPassengers, setTotalPassengers] = useState(0);
+  const [activePassengersCount, setActivePassengersCount] = useState(0);
+  const [activeDriversCount, setActiveDriversCount] = useState(0);
 
   // Estados de paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -76,6 +81,69 @@ export function usePaginatedUsers({
       console.error("Error al obtener el conteo total:", err);
     }
   }, [role, isOnline]);
+
+  // Cargar el conteo total general de usuarios (independiente del rol)
+  const fetchGlobalTotalUsers = useCallback(async () => {
+    try {
+      const usersRef = collection(db, "users");
+      const snapshot = await getCountFromServer(usersRef);
+      setGlobalTotalUsers(snapshot.data().count);
+    } catch (err) {
+      console.error("Error al obtener el total de usuarios general:", err);
+    }
+  }, []);
+
+  // Cargar el conteo total de conductores y pasajeros registrados en el sistema
+  const fetchTotalUsersByRole = useCallback(async () => {
+    try {
+      const usersRef = collection(db, "users");
+
+      // Conductores
+      const driversQuery = query(
+        usersRef,
+        where("role", "in", ["Conductor", "conductor", "Operador", "operador"])
+      );
+      const snapshotDrivers = await getCountFromServer(driversQuery);
+      setTotalDrivers(snapshotDrivers.data().count);
+
+      // Pasajeros
+      const passengersQuery = query(
+        usersRef,
+        where("role", "in", ["Pasajero", "pasajero", "Supervisor", "supervisor"])
+      );
+      const snapshotPassengers = await getCountFromServer(passengersQuery);
+      setTotalPassengers(snapshotPassengers.data().count);
+    } catch (err) {
+      console.error("Error al obtener conteos totales por rol:", err);
+    }
+  }, []);
+
+  // Cargar los conteos de pasajeros activos (isOnline === true) y conductores activos (isOnline === true)
+  const fetchActiveUsersCounts = useCallback(async () => {
+    try {
+      const usersRef = collection(db, "users");
+      const activeQuery = query(usersRef, where("isOnline", "==", true));
+      const snapshot = await getDocs(activeQuery);
+
+      let passengers = 0;
+      let drivers = 0;
+
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const userRole = (data.role || "").toLowerCase();
+        if (userRole === "pasajero" || userRole === "supervisor") {
+          passengers++;
+        } else if (userRole === "conductor" || userRole === "operador") {
+          drivers++;
+        }
+      });
+
+      setActivePassengersCount(passengers);
+      setActiveDriversCount(drivers);
+    } catch (err) {
+      console.error("Error al obtener los conteos de usuarios activos:", err);
+    }
+  }, []);
 
   // Ejecutar query
   const executeQuery = async (q) => {
@@ -146,6 +214,9 @@ export function usePaginatedUsers({
   // Refresh (recargar la primera página)
   const refresh = () => {
     fetchTotalCount();
+    fetchGlobalTotalUsers();
+    fetchTotalUsersByRole();
+    fetchActiveUsersCounts();
     fetchFirstPage();
   };
 
@@ -153,13 +224,18 @@ export function usePaginatedUsers({
   useEffect(() => {
     refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [buildBaseQuery, fetchTotalCount]);
+  }, [buildBaseQuery, fetchTotalCount, fetchGlobalTotalUsers, fetchTotalUsersByRole, fetchActiveUsersCounts]);
 
   return {
     users,
     loading,
     error,
     totalCount,
+    globalTotalUsers,
+    totalDrivers,
+    totalPassengers,
+    activePassengersCount,
+    activeDriversCount,
     currentPage,
     isFirstPage,
     isLastPage,

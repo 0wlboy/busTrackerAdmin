@@ -10,7 +10,8 @@ import {
   endBefore,
   limitToLast,
   doc,
-  getDoc
+  getDoc,
+  where
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 
@@ -30,6 +31,7 @@ export function usePaginatedVehicles({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
+  const [activeVehicleCount, setActiveVehicleCount] = useState(0);
 
   // Estados de paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -104,6 +106,49 @@ export function usePaginatedVehicles({
     }
   }, []);
 
+  /**
+   * Cuenta los vehículos activos:
+   * - Obtiene todos los documentos de "tracking" donde online === true
+   * - Cada documento en "tracking" usa el driverId como ID y se relaciona
+   *   con un vehículo a través de su campo driverId en "vehicles"
+   * - Cuenta cuántos de esos driverIds tienen un vehículo registrado
+   */
+  const fetchActiveVehicleCount = useCallback(async () => {
+    try {
+      // 1. Obtener todos los docs de tracking donde online === true
+      const trackingRef = collection(db, "tracking");
+      const onlineQuery = query(trackingRef, where("online", "==", true));
+      const trackingSnap = await getDocs(onlineQuery);
+
+      if (trackingSnap.empty) {
+        setActiveVehicleCount(0);
+        return;
+      }
+
+      // 2. Recopilar los driverIds que están online
+      const onlineDriverIds = trackingSnap.docs.map((d) => d.id);
+
+      // 3. Verificar cuáles de esos driverIds tienen un vehículo registrado
+      //    (un vehículo cuyo campo driverId coincide con el ID del doc tracking)
+      const vehiclesRef = collection(db, "vehicles");
+      const vehiclesSnap = await getDocs(query(vehiclesRef));
+
+      const registeredDriverIds = new Set(
+        vehiclesSnap.docs
+          .map((d) => d.data().driverId)
+          .filter(Boolean)
+      );
+
+      const activeCount = onlineDriverIds.filter((id) =>
+        registeredDriverIds.has(id)
+      ).length;
+
+      setActiveVehicleCount(activeCount);
+    } catch (err) {
+      console.error("Error al obtener el conteo de vehículos activos:", err);
+    }
+  }, []);
+
   // Ejecutar query
   const executeQuery = async (q) => {
     setLoading(true);
@@ -164,6 +209,7 @@ export function usePaginatedVehicles({
   // Refresh (recargar la primera página)
   const refresh = () => {
     fetchTotalCount();
+    fetchActiveVehicleCount();
     fetchFirstPage();
   };
 
@@ -171,13 +217,14 @@ export function usePaginatedVehicles({
   useEffect(() => {
     refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [buildBaseQuery, fetchTotalCount]);
+  }, [buildBaseQuery, fetchTotalCount, fetchActiveVehicleCount]);
 
   return {
     vehicles,
     loading,
     error,
     totalCount,
+    activeVehicleCount,
     currentPage,
     isFirstPage,
     isLastPage,
