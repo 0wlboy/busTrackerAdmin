@@ -9,7 +9,8 @@ export default function Login() {
   const [email, setEmail] = useState("admin@empresa.com");
   const [password, setPassword] = useState("admin123");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Si el usuario ya está logueado, redirigir a /home
@@ -21,39 +22,54 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
+    setErrors({});
+    setSubmitError("");
 
-    if (!email || !password) {
-      setError("Por favor, ingresa tu email y contraseña.");
-      setLoading(false);
-      return;
-    }
-
-    // Expresiones regulares de validación
+    const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const passwordRegex = /^.{6,}$/;
 
-    if (!emailRegex.test(email.trim())) {
-      setError("El correo electrónico no es válido.");
-      setLoading(false);
+    if (!email.trim()) {
+      newErrors.email = "El correo electrónico es requerido. Por favor, escribe tu dirección de correo electrónico.";
+    } else if (!emailRegex.test(email.trim())) {
+      newErrors.email = "El formato del correo electrónico no es válido. Asegúrate de incluir el símbolo '@' y un dominio válido (ej. usuario@empresa.com).";
+    }
+
+    if (!password) {
+      newErrors.password = "La contraseña es requerida. Por favor, escribe la clave de acceso.";
+    } else if (password.length < 6) {
+      newErrors.password = "La contraseña debe tener al menos 6 caracteres. Si olvidaste tu contraseña, usa el enlace de recuperación.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
-    if (!passwordRegex.test(password)) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
-      setLoading(false);
-      return;
-    }
-
+    setLoading(true);
     try {
-      await login(email, password);
+      await login(email.trim(), password);
       // El login fue exitoso, no necesitamos quitar el loading porque nos vamos de la página
       navigate("/home", { replace: true });
     } catch (err) {
       console.error("Error detallado durante el login:", err);
-      const errorMessage = err.message || "Error desconocido";
-      setError("Error al iniciar sesión: " + errorMessage);
+      const code = err.code || "";
+      const msg = err.message || "";
+      
+      if (code === "auth/user-not-found" || code === "auth/invalid-credential" || msg.includes("no existe") || msg.includes("not-found")) {
+        setErrors((prev) => ({
+          ...prev,
+          email: "No se encontró ningún usuario con este correo electrónico. Por favor, verifica la dirección ingresada o regístrate.",
+        }));
+      } else if (code === "auth/wrong-password" || msg.includes("contraseña es incorrecta")) {
+        setErrors((prev) => ({
+          ...prev,
+          password: "La contraseña ingresada es incorrecta. Asegúrate de respetar mayúsculas y minúsculas, o restablece tu contraseña.",
+        }));
+      } else if (code === "auth/too-many-requests") {
+        setSubmitError("Se ha bloqueado temporalmente el acceso a esta cuenta debido a múltiples intentos fallidos. Intenta recuperar la contraseña o espera unos minutos.");
+      } else {
+        setSubmitError("Error al iniciar sesión: " + (err.message || "Error desconocido. Por favor, intenta de nuevo."));
+      }
       setLoading(false);
     }
   };
@@ -109,10 +125,23 @@ export default function Login() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setErrors((prev) => ({ ...prev, email: "" }));
+                  setSubmitError("");
+                }}
                 placeholder="admin@empresa.com"
                 className="w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 text-[#2D1E2F] placeholder-[#2D1E2F]/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#EFCC01] focus:ring-2 focus:ring-[#EFCC01]/30 transition-all"
               />
+              {errors.email && (
+                <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5 animate-fadeIn">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                  <div>
+                    <span className="font-semibold block">Alerta en correo electrónico</span>
+                    <span>{errors.email}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
@@ -123,7 +152,11 @@ export default function Login() {
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setErrors((prev) => ({ ...prev, password: "" }));
+                    setSubmitError("");
+                  }}
                   placeholder="••••••••"
                   className="w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 text-[#2D1E2F] placeholder-[#2D1E2F]/30 rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:border-[#EFCC01] focus:ring-2 focus:ring-[#EFCC01]/30 transition-all"
                 />
@@ -139,12 +172,21 @@ export default function Login() {
                   )}
                 </button>
               </div>
+              {errors.password && (
+                <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5 animate-fadeIn">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                  <div>
+                    <span className="font-semibold block">Alerta en contraseña</span>
+                    <span>{errors.password}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {error && (
+            {submitError && (
               <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-600 text-sm">
                 <AlertCircle className="w-4 h-4 shrink-0" />
-                {error}
+                {submitError}
               </div>
             )}
 

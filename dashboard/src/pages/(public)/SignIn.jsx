@@ -30,40 +30,44 @@ export default function SignIn() {
 
   const validate = () => {
     const e = {};
+    const userNameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{3,50}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const cedulaRegex = /^\d+$/;
     const phoneRegex = /^\+?[0-9\s\-]{7,15}$/;
+    const passwordRegex = /^.{6,20}$/;
 
     if (!form.userName.trim()) {
-      e.userName = "El nombre de usuario es requerido.";
+      e.userName = "El nombre de usuario es requerido. Para solucionarlo, ingresa tu nombre completo usando solo letras y espacios.";
+    } else if (!userNameRegex.test(form.userName.trim())) {
+      e.userName = "El nombre de usuario debe contener únicamente letras y espacios, y tener una longitud de entre 3 y 50 caracteres.";
     }
 
     if (!form.email.trim()) {
-      e.email = "El correo electrónico es requerido.";
+      e.email = "El correo electrónico es requerido. Asegúrate de ingresar tu correo corporativo o personal.";
     } else if (!emailRegex.test(form.email.trim())) {
-      e.email = "El correo electrónico no es válido.";
+      e.email = "El formato de correo electrónico no es válido. Asegúrate de incluir el carácter '@' seguido de un dominio (ej. admin@empresa.com).";
     }
 
     if (!form.cedula.trim()) {
-      e.cedula = "La cédula es requerida.";
+      e.cedula = "La cédula es requerida. Ingresa tu número de identificación nacional.";
     } else if (!cedulaRegex.test(form.cedula.trim())) {
-      e.cedula = "La cédula debe contener solo números.";
+      e.cedula = "La cédula debe contener únicamente dígitos numéricos. Elimina cualquier letra, punto, espacio o guion.";
     }
 
     if (form.phone.trim() && !phoneRegex.test(form.phone.trim())) {
-      e.phone = "El teléfono debe ser válido (7–15 dígitos).";
+      e.phone = "El número telefónico no es válido. Debe tener entre 7 y 15 dígitos y puede comenzar con el símbolo '+' (ej. +584120000000).";
     }
 
     if (!form.password) {
-      e.password = "La contraseña es requerida.";
-    } else if (form.password.length < 6) {
-      e.password = "La contraseña debe tener al menos 6 caracteres.";
+      e.password = "La contraseña es requerida. Ingresa una clave segura para proteger tu cuenta.";
+    } else if (!passwordRegex.test(form.password)) {
+      e.password = "La contraseña debe tener una longitud de entre 6 y 20 caracteres.";
     }
 
     if (!form.confirmPassword) {
-      e.confirmPassword = "Confirma tu contraseña.";
+      e.confirmPassword = "Es necesario confirmar la contraseña. Por favor, vuelve a escribir la clave.";
     } else if (form.password !== form.confirmPassword) {
-      e.confirmPassword = "Las contraseñas no coinciden.";
+      e.confirmPassword = "Las contraseñas no coinciden. Asegúrate de escribir exactamente los mismos caracteres en ambos campos.";
     }
 
     return e;
@@ -92,13 +96,22 @@ export default function SignIn() {
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
       if (err.code === "auth/email-already-in-use") {
-        setSubmitError("El correo electrónico ya está registrado.");
+        setErrors((prev) => ({
+          ...prev,
+          email: "Este correo electrónico ya está registrado en el sistema. Para solucionarlo, usa un correo electrónico diferente o recupera la contraseña si la has olvidado.",
+        }));
       } else if (err.code === "auth/weak-password") {
-        setSubmitError("La contraseña es demasiado débil.");
+        setErrors((prev) => ({
+          ...prev,
+          password: "La contraseña ingresada es muy débil. Intenta usar una combinación de letras, números y caracteres especiales (mínimo 6 caracteres).",
+        }));
       } else if (err.code === "auth/invalid-email") {
-        setSubmitError("El formato del correo electrónico es inválido.");
+        setErrors((prev) => ({
+          ...prev,
+          email: "El formato del correo es inválido. Verifica que no tenga espacios adicionales y que incluya un dominio correcto.",
+        }));
       } else {
-        setSubmitError("Ocurrió un error al registrar la cuenta. Inténtalo de nuevo.");
+        setSubmitError("Ocurrió un error inesperado al registrar la cuenta. Inténtalo de nuevo más tarde.");
       }
     } finally {
       setLoading(false);
@@ -188,7 +201,13 @@ export default function SignIn() {
                     className={inputClass(!!errors.userName)}
                   />
                   {errors.userName && (
-                    <p className="text-red-500 text-xs mt-1">{errors.userName}</p>
+                    <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                      <div>
+                        <span className="font-semibold block">Alerta en nombre de usuario</span>
+                        <span>{errors.userName}</span>
+                      </div>
+                    </div>
                   )}
                 </div>
 
@@ -207,7 +226,13 @@ export default function SignIn() {
                     className={inputClass(!!errors.email)}
                   />
                   {errors.email && (
-                    <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                    <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                      <div>
+                        <span className="font-semibold block">Alerta en correo electrónico</span>
+                        <span>{errors.email}</span>
+                      </div>
+                    </div>
                   )}
                 </div>
 
@@ -226,7 +251,13 @@ export default function SignIn() {
                       className={inputClass(!!errors.cedula)}
                     />
                     {errors.cedula && (
-                      <p className="text-red-500 text-xs mt-1">{errors.cedula}</p>
+                      <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                        <div>
+                          <span className="font-semibold block">Alerta en cédula</span>
+                          <span>{errors.cedula}</span>
+                        </div>
+                      </div>
                     )}
                   </div>
 
@@ -243,7 +274,13 @@ export default function SignIn() {
                       className={inputClass(!!errors.phone)}
                     />
                     {errors.phone && (
-                      <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                      <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                        <div>
+                          <span className="font-semibold block">Alerta en teléfono</span>
+                          <span>{errors.phone}</span>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -272,7 +309,13 @@ export default function SignIn() {
                     </button>
                   </div>
                   {errors.password && (
-                    <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                    <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                      <div>
+                        <span className="font-semibold block">Alerta en contraseña</span>
+                        <span>{errors.password}</span>
+                      </div>
+                    </div>
                   )}
                 </div>
 
@@ -300,7 +343,13 @@ export default function SignIn() {
                     </button>
                   </div>
                   {errors.confirmPassword && (
-                    <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
+                    <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                      <div>
+                        <span className="font-semibold block">Alerta en confirmación</span>
+                        <span>{errors.confirmPassword}</span>
+                      </div>
+                    </div>
                   )}
                 </div>
 

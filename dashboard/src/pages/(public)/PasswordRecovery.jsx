@@ -17,12 +17,12 @@ export default function PasswordRecovery() {
     setError("");
 
     if (!email.trim()) {
-      setError("Por favor, ingresa tu correo electrónico.");
+      setError("El correo electrónico es requerido. Por favor, escribe tu dirección de correo electrónico para poder enviarte el enlace de recuperación.");
       return;
     }
 
     if (!emailRegex.test(email.trim())) {
-      setError("El correo electrónico no es válido.");
+      setError("El formato del correo electrónico no es válido. Asegúrate de incluir una dirección correcta que contenga '@' y un dominio (ej. usuario@empresa.com).");
       return;
     }
 
@@ -32,11 +32,11 @@ export default function PasswordRecovery() {
       setSent(true);
     } catch (err) {
       if (err.code === "auth/user-not-found") {
-        setError("No existe ninguna cuenta asociada a ese correo.");
+        setError("No existe ninguna cuenta asociada a este correo electrónico. Por favor, verifica si lo escribiste correctamente o ponte en contacto con soporte.");
       } else if (err.code === "auth/too-many-requests") {
-        setError("Demasiados intentos. Por favor, espera un momento e inténtalo de nuevo.");
+        setError("Se han realizado demasiados intentos de recuperación de contraseña seguidos. Para solucionarlo, espera unos minutos antes de intentar de nuevo.");
       } else {
-        setError("Ocurrió un error al enviar el correo. Inténtalo de nuevo.");
+        setError("Ocurrió un error inesperado al intentar enviar el correo de recuperación. Por favor, intenta de nuevo más tarde.");
       }
     } finally {
       setLoading(false);
@@ -139,14 +139,16 @@ export default function PasswordRecovery() {
                     autoComplete="email"
                     className="w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 text-[#2D1E2F] placeholder-[#2D1E2F]/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#EFCC01] focus:ring-2 focus:ring-[#EFCC01]/30 transition-all"
                   />
+                  {error && (
+                    <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5 animate-fadeIn">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                      <div>
+                        <span className="font-semibold block">Alerta en correo electrónico</span>
+                        <span>{error}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                {error && (
-                  <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-600 text-sm">
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                    {error}
-                  </div>
-                )}
 
                 <button
                   id="send-recovery-btn"

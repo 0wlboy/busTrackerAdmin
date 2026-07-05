@@ -8,6 +8,7 @@ import {
   Upload,
   Bus,
   Image as ImageIcon,
+  AlertCircle,
 } from "lucide-react";
 
 export default function AddVehicule() {
@@ -41,12 +42,27 @@ export default function AddVehicule() {
 
   const validate = () => {
     const e = {};
-    if (!form.driverId.trim()) e.driverId = "El ID del conductor es requerido";
-    if (!form.routeId) e.routeId = "Debes seleccionar una ruta";
-    if (!form.seats) e.seats = "La cantidad de asientos es requerida";
-    else if (isNaN(form.seats) || Number(form.seats) <= 0)
-      e.seats = "Debe ser un número positivo válido";
-    if (!form.imageFile) e.imageFile = "Debes subir una foto del vehículo";
+    const plateRegex = /^[a-zA-Z0-9\-]{5,10}$/;
+
+    if (!form.driverId.trim()) {
+      e.driverId = "El ID del conductor es requerido. Por favor, ingresa el identificador único (UID) del conductor registrado.";
+    }
+    if (!form.plate.trim()) {
+      e.plate = "La placa del vehículo es requerida. Por favor, escribe la combinación alfanumérica oficial.";
+    } else if (!plateRegex.test(form.plate.trim())) {
+      e.plate = "El formato de la placa no es válido o no cumple con la longitud. Debe tener entre 5 y 10 caracteres y contener solo letras, números o guion (ej. ABC-1234).";
+    }
+    if (!form.routeId) {
+      e.routeId = "Debes seleccionar una ruta. Asigna una ruta del menú desplegable para continuar.";
+    }
+    if (!form.seats) {
+      e.seats = "La cantidad de asientos es requerida.";
+    } else if (isNaN(form.seats) || Number(form.seats) <= 0) {
+      e.seats = "La cantidad de asientos debe ser un número entero positivo válido mayor a cero. Por favor, corrígelo.";
+    }
+    if (!form.imageFile) {
+      e.imageFile = "Debes subir una foto del vehículo. Selecciona una imagen desde tus archivos para poder identificar la unidad.";
+    }
     return e;
   };
 
@@ -95,7 +111,20 @@ export default function AddVehicule() {
       setSubmitted(true);
       setTimeout(() => navigate("/vehicle-view"), 1500);
     } catch (err) {
-      setSubmitError(err.message);
+      const msg = err.message || "";
+      if (msg.includes("conductor ya tiene un vehículo") || msg.includes("already has")) {
+        setErrors((prev) => ({
+          ...prev,
+          driverId: "Este conductor ya tiene un vehículo asignado. Para solucionarlo, ingresa el UID de un conductor diferente sin asignaciones.",
+        }));
+      } else if (msg.includes("no existe") || msg.includes("not exist") || msg.includes("not found")) {
+        setErrors((prev) => ({
+          ...prev,
+          driverId: "El ID del conductor ingresado no existe en la base de datos de usuarios. Por favor, verifica el UID o regístralo primero.",
+        }));
+      } else {
+        setSubmitError(msg);
+      }
     } finally {
       setUploading(false);
     }
@@ -193,7 +222,13 @@ export default function AddVehicule() {
               className="hidden"
             />
             {errors.imageFile && (
-              <p className="text-red-500 text-xs mt-1">{errors.imageFile}</p>
+              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                <div>
+                  <span className="font-semibold block">Alerta en foto del vehículo</span>
+                  <span>{errors.imageFile}</span>
+                </div>
+              </div>
             )}
           </div>
 
@@ -213,7 +248,13 @@ export default function AddVehicule() {
               El usuario debe existir y tener el rol de conductor.
             </p>
             {errors.driverId && (
-              <p className="text-red-500 text-xs mt-1">{errors.driverId}</p>
+              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                <div>
+                  <span className="font-semibold block">Alerta en ID del Conductor</span>
+                  <span>{errors.driverId}</span>
+                </div>
+              </div>
             )}
           </div>
 
@@ -233,7 +274,13 @@ export default function AddVehicule() {
               La placa del vehiculo.
             </p>
             {errors.plate && (
-              <p className="text-red-500 text-xs mt-1">{errors.driverId}</p>
+              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                <div>
+                  <span className="font-semibold block">Alerta en placa del vehículo</span>
+                  <span>{errors.plate}</span>
+                </div>
+              </div>
             )}
           </div>
 
@@ -251,7 +298,13 @@ export default function AddVehicule() {
               className={inputClass(!!errors.seats)}
             />
             {errors.seats && (
-              <p className="text-red-500 text-xs mt-1">{errors.seats}</p>
+              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                <div>
+                  <span className="font-semibold block">Alerta en cantidad de asientos</span>
+                  <span>{errors.seats}</span>
+                </div>
+              </div>
             )}
           </div>
 
@@ -279,7 +332,13 @@ export default function AddVehicule() {
               )}
             </select>
             {errors.routeId && (
-              <p className="text-red-500 text-xs mt-1">{errors.routeId}</p>
+              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                <div>
+                  <span className="font-semibold block">Alerta en ruta</span>
+                  <span>{errors.routeId}</span>
+                </div>
+              </div>
             )}
           </div>
         </div>

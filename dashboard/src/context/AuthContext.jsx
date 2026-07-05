@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -25,7 +31,7 @@ const SESSION_TIMEOUT = 24 * 60 * 60 * 1000; // 24 horas en milisegundos
 const getLocalSession = () => {
   const stored = localStorage.getItem(SESSION_KEY);
   if (!stored) return null;
-  
+
   try {
     const session = JSON.parse(stored);
     const now = Date.now();
@@ -46,7 +52,7 @@ const saveLocalSession = (user) => {
     JSON.stringify({
       user,
       lastActivity: Date.now(),
-    })
+    }),
   );
 };
 
@@ -61,7 +67,7 @@ const updateLastActivity = () => {
       const session = JSON.parse(stored);
       session.lastActivity = Date.now();
       localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    } catch(e) {}
+    } catch (e) {}
   }
 };
 
@@ -109,7 +115,7 @@ export const AuthProvider = ({ children }) => {
       const userDoc = await getDoc(userDocRef);
 
       if (!userDoc.exists()) {
-        await signOut(auth); 
+        await signOut(auth);
         const error = new Error("El usuario no existe en la base de datos.");
         error.code = "auth/user-not-found-in-db";
         throw error;
@@ -117,7 +123,7 @@ export const AuthProvider = ({ children }) => {
 
       const userData = userDoc.data();
       if (userData.role !== "admin") {
-        await signOut(auth); 
+        await signOut(auth);
         const error = new Error(
           "Acceso denegado: No tienes permisos de administrador.",
         );
@@ -132,10 +138,9 @@ export const AuthProvider = ({ children }) => {
         role: userData.role,
         userName: userData.userName,
       };
-      
+
       setCurrentUser(authUser);
       saveLocalSession(authUser);
-      
     } catch (error) {
       if (error.code === "unavailable") {
         alert(
@@ -144,7 +149,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         console.error("Error de login:", error);
       }
-      throw error; 
+      throw error;
     }
   };
 
@@ -172,6 +177,8 @@ export const AuthProvider = ({ children }) => {
         role: "admin",
         isOnline: false,
         createdAt: serverTimestamp(),
+        modifiedAt: serverTimestamp(),
+        lastLogin: serverTimestamp(),
       });
 
       return { uid: user.uid };
@@ -250,7 +257,7 @@ export const AuthProvider = ({ children }) => {
       // Throttle: solo actualizamos LocalStorage como máximo una vez por minuto para no saturar rendimiento
       if (now - lastUpdate > 60000) {
         lastUpdate = now;
-        
+
         const stored = localStorage.getItem(SESSION_KEY);
         if (stored) {
           try {
@@ -262,7 +269,7 @@ export const AuthProvider = ({ children }) => {
               // Registramos la nueva actividad
               updateLastActivity();
             }
-          } catch(e) {}
+          } catch (e) {}
         }
       }
     };
@@ -282,7 +289,7 @@ export const AuthProvider = ({ children }) => {
           if (Date.now() - session.lastActivity > SESSION_TIMEOUT) {
             logout();
           }
-        } catch(e) {}
+        } catch (e) {}
       }
     }, 60000);
 

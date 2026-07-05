@@ -1,7 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAddUser } from "../../hooks/useAddUser";
-import { ArrowLeft, UserPlus, Check, Loader2, Eye, EyeOff } from "lucide-react";
+import {
+  ArrowLeft,
+  UserPlus,
+  Check,
+  Loader2,
+  Eye,
+  EyeOff,
+  AlertCircle,
+} from "lucide-react";
 
 export default function AddUser() {
   const { addUser, loading, hookError } = useAddUser();
@@ -12,7 +20,6 @@ export default function AddUser() {
     email: "",
     cedula: "",
     role: "",
-    status: "active",
     password: "",
     confirmPassword: "",
     phone: "",
@@ -25,48 +32,57 @@ export default function AddUser() {
     const e = {};
 
     // Expresiones regulares de validación
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{3,50}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const cedulaRegex = /^\d+$/;
-    const passwordRegex = /^.{6,}$/;
+    const passwordRegex = /^.{6,20}$/;
     const phoneRegex = /^\+?[0-9\s\-]{7,15}$/;
 
     // Nombre completo
     if (!form.name.trim()) {
-      e.name = "El nombre es requerido";
+      e.name =
+        "El nombre completo es requerido. Por favor, ingresa tu nombre y apellido.";
     } else if (!nameRegex.test(form.name.trim())) {
-      e.name = "El nombre debe contener únicamente letras y espacios";
+      e.name =
+        "El nombre debe contener únicamente letras y espacios, y tener una longitud de entre 3 y 50 caracteres.";
     }
 
     // Correo electrónico
     if (!form.email.trim()) {
-      e.email = "El correo es requerido";
+      e.email =
+        "El correo electrónico es requerido. Ingresa una dirección válida.";
     } else if (!emailRegex.test(form.email.trim())) {
-      e.email = "El correo no es válido";
+      e.email =
+        "El formato de correo no es válido. Asegúrate de incluir el carácter '@' y un dominio correcto (ej. nombre@correo.com).";
     }
 
     // Cédula
     if (!form.cedula.trim()) {
-      e.cedula = "La cédula es requerida";
+      e.cedula =
+        "La cédula es requerida. Por favor, ingresa tu documento de identidad.";
     } else if (!cedulaRegex.test(form.cedula.trim())) {
-      e.cedula = "La cédula debe contener únicamente números";
+      e.cedula =
+        "La cédula debe contener únicamente números. Remueve cualquier letra, espacio, guion o punto.";
     }
 
-    // Teléfono (opcional, pero si se ingresa se valida)
+    // Teléfono (opcional)
     if (form.phone.trim() && !phoneRegex.test(form.phone.trim())) {
-      e.phone = "El teléfono debe ser válido (7-15 dígitos, opcional +)";
+      e.phone =
+        "El número telefónico no es válido. Asegúrate de ingresar entre 7 y 15 dígitos numéricos (ej. +584120000000).";
     }
 
     // Contraseña
     if (!form.password) {
-      e.password = "La contraseña es requerida";
+      e.password = "La contraseña es requerida. Elige una clave de seguridad.";
     } else if (!passwordRegex.test(form.password)) {
-      e.password = "La contraseña debe tener al menos 6 caracteres";
+      e.password =
+        "La contraseña debe tener una longitud de entre 6 y 20 caracteres.";
     }
 
     // Confirmar contraseña
     if (form.password !== form.confirmPassword) {
-      e.confirmPassword = "Las contraseñas no coinciden";
+      e.confirmPassword =
+        "Las contraseñas no coinciden. Asegúrate de escribir exactamente la misma contraseña en ambos campos.";
     }
 
     return e;
@@ -100,7 +116,33 @@ export default function AddUser() {
         "AddUser: ❌ Hubo un error devuelto por el hook:",
         result.error,
       );
-      setSubmitError(result.error.message);
+      const errMsg = result.error.message;
+      if (
+        errMsg.includes("correo electrónico ya está en uso") ||
+        errMsg.includes("already-in-use")
+      ) {
+        setErrors((prev) => ({
+          ...prev,
+          email:
+            "Este correo electrónico ya está registrado. Por favor, usa una dirección de correo diferente.",
+        }));
+      } else if (errMsg.includes("débil") || errMsg.includes("weak-password")) {
+        setErrors((prev) => ({
+          ...prev,
+          password:
+            "La contraseña es muy débil. Asegúrate de ingresar una combinación más segura (mínimo 6 caracteres).",
+        }));
+      } else if (
+        errMsg.includes("inválido") ||
+        errMsg.includes("invalid-email")
+      ) {
+        setErrors((prev) => ({
+          ...prev,
+          email: "El formato de correo electrónico ingresado no es válido.",
+        }));
+      } else {
+        setSubmitError(errMsg);
+      }
     }
   };
 
@@ -186,7 +228,15 @@ export default function AddUser() {
               className={inputClass(!!errors.name)}
             />
             {errors.name && (
-              <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                <div>
+                  <span className="font-semibold block">
+                    Alerta en nombre completo
+                  </span>
+                  <span>{errors.name}</span>
+                </div>
+              </div>
             )}
           </div>
 
@@ -202,7 +252,15 @@ export default function AddUser() {
               className={inputClass(!!errors.email)}
             />
             {errors.email && (
-              <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                <div>
+                  <span className="font-semibold block">
+                    Alerta en correo electrónico
+                  </span>
+                  <span>{errors.email}</span>
+                </div>
+              </div>
             )}
           </div>
 
@@ -218,7 +276,13 @@ export default function AddUser() {
               className={inputClass(!!errors.cedula)}
             />
             {errors.cedula && (
-              <p className="text-red-500 text-xs mt-1">{errors.cedula}</p>
+              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                <div>
+                  <span className="font-semibold block">Alerta en cédula</span>
+                  <span>{errors.cedula}</span>
+                </div>
+              </div>
             )}
           </div>
 
@@ -234,7 +298,15 @@ export default function AddUser() {
               className={inputClass(!!errors.phone)}
             />
             {errors.phone && (
-              <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                <div>
+                  <span className="font-semibold block">
+                    Alerta en teléfono
+                  </span>
+                  <span>{errors.phone}</span>
+                </div>
+              </div>
             )}
           </div>
 
@@ -251,30 +323,40 @@ export default function AddUser() {
             </select>
           </div>
 
-          <div>
+          <div className="relative">
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
               Contraseña *
             </label>
-            <input
-              type={showPassword ? "text" : "password"}
-              value={form.password}
-              onChange={(e) => set("password", e.target.value)}
-              placeholder="Mínimo 6 caracteres"
-              className={inputClass(!!errors.password)}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-2/3 transform -translate-y-1/2"
-            >
-              {showPassword ? (
-                <EyeOff className="w-5 h-5 text-muted-foreground" />
-              ) : (
-                <Eye className="w-5 h-5 text-muted-foreground" />
-              )}
-            </button>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={form.password}
+                onChange={(e) => set("password", e.target.value)}
+                placeholder="Mínimo 6 caracteres"
+                className={inputClass(!!errors.password) + " pr-12"}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5 text-muted-foreground" />
+                ) : (
+                  <Eye className="w-5 h-5 text-muted-foreground" />
+                )}
+              </button>
+            </div>
             {errors.password && (
-              <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                <div>
+                  <span className="font-semibold block">
+                    Alerta en contraseña
+                  </span>
+                  <span>{errors.password}</span>
+                </div>
+              </div>
             )}
           </div>
 
@@ -290,9 +372,15 @@ export default function AddUser() {
               className={inputClass(!!errors.confirmPassword)}
             />
             {errors.confirmPassword && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.confirmPassword}
-              </p>
+              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+                <div>
+                  <span className="font-semibold block">
+                    Alerta en confirmación
+                  </span>
+                  <span>{errors.confirmPassword}</span>
+                </div>
+              </div>
             )}
           </div>
         </div>
