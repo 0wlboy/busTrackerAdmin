@@ -10,10 +10,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
-  FileText,
 } from "lucide-react";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import ExportDropdown from "../../components/ExportDropdown.jsx";
 // Opcional, si necesitas usar el contexto de autenticación:
 // import { useAuth } from "../../context/AuthContext";
 
@@ -68,53 +66,30 @@ export default function DriverView() {
     return matchSearch && matchStatus;
   });
 
-  const exportToPDF = () => {
-    const doc = new jsPDF();
-    doc.text("Reporte de Conductores", 14, 15);
-
-    // Preparar los datos
-    const tableColumn = [
-      "Usuario",
-      "Cédula",
-      "Correo",
-      "Conexión",
-      "Registrado",
-      "Último acceso",
-    ];
-    const tableRows = [];
-
-    filtered.forEach((user) => {
-      const userData = [
-        user.userName || "Sin nombre",
-        user.cedula || "N/A",
-        user.email || "Sin correo",
-        user.isOnline ? "Conectado" : "Desconectado",
+  const exportColumns = [
+    { header: "Usuario", getValue: (user) => user.userName || "Sin nombre" },
+    { header: "Cédula", getValue: (user) => user.cedula || "N/A" },
+    { header: "Correo", getValue: (user) => user.email || "Sin correo" },
+    { header: "Conexión", getValue: (user) => user.isOnline ? "Conectado" : "Desconectado" },
+    {
+      header: "Registrado",
+      getValue: (user) =>
         user.createdAt
           ? new Date(
-              user.createdAt.seconds
-                ? user.createdAt.seconds * 1000
-                : user.createdAt,
+              user.createdAt.seconds ? user.createdAt.seconds * 1000 : user.createdAt,
             ).toLocaleDateString()
           : "N/A",
+    },
+    {
+      header: "Último acceso",
+      getValue: (user) =>
         user.lastLogin
           ? new Date(
-              user.lastLogin.seconds
-                ? user.lastLogin.seconds * 1000
-                : user.lastLogin,
+              user.lastLogin.seconds ? user.lastLogin.seconds * 1000 : user.lastLogin,
             ).toLocaleDateString()
           : "N/A",
-      ];
-      tableRows.push(userData);
-    });
-
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-    });
-
-    doc.save("conductores_vista_actual.pdf");
-  };
+    },
+  ];
 
   return (
     <div className="p-6 space-y-5">
@@ -128,15 +103,13 @@ export default function DriverView() {
           </p>
         </div>
 
-        {/* Botón para descargar PDF */}
-        <button
-          onClick={exportToPDF}
-          disabled={loading || filtered.length === 0}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#EFCC01] text-[#2D1E2F] rounded-xl hover:bg-[#F2D72B] transition-colors font-medium text-sm disabled:opacity-50 disabled:pointer-events-none"
-        >
-          <FileText className="w-4 h-4" />
-          Descargar PDF
-        </button>
+        <ExportDropdown
+          data={filtered}
+          columns={exportColumns}
+          fileName="conductores_vista_actual"
+          title="Reporte de Conductores"
+          disabled={loading}
+        />
       </div>
 
       {/* Search & Filters */}

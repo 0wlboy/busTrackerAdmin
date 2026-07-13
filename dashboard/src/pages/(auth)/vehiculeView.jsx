@@ -7,11 +7,9 @@ import {
   Loader2,
   Bus,
   Plus,
-  FileText,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import ExportDropdown from "../../components/ExportDropdown.jsx";
 
 export default function VehicleView() {
   const navigate = useNavigate();
@@ -48,46 +46,30 @@ export default function VehicleView() {
     return matchSearch;
   });
 
-  const exportToPDF = () => {
-    const doc = new jsPDF();
-    doc.text("Reporte de Vehículos", 14, 15);
-
-    // Preparar los datos
-    const tableColumn = ["ID", "Ruta", "Asientos", "Cédula"];
-    const tableRows = [];
-
-    filtered.forEach((vehicle) => {
-      const vehicleData = [
-        vehicle.id || "Sin ID",
-        vehicle.routeId || "Sin ruta",
-        vehicle.seats || "Sin asientos",
-        cedulas[vehicle.driverId] || "Sin cédula",
-        vehicle.createdAt
+  const exportColumns = [
+    { header: "ID", getValue: (v) => v.id || "Sin ID" },
+    { header: "Ruta", getValue: (v) => v.routeId || "Sin ruta" },
+    { header: "Asientos", getValue: (v) => v.seats || "Sin asientos" },
+    { header: "Cédula", getValue: (v) => cedulas[v.driverId] || "Sin cédula" },
+    {
+      header: "Creado",
+      getValue: (v) =>
+        v.createdAt
           ? new Date(
-              vehicle.createdAt.seconds
-                ? vehicle.createdAt.seconds * 1000
-                : vehicle.createdAt,
+              v.createdAt.seconds ? v.createdAt.seconds * 1000 : v.createdAt,
             ).toLocaleDateString()
           : "N/A",
-        vehicle.lastUpdate
+    },
+    {
+      header: "Actualizado",
+      getValue: (v) =>
+        v.lastUpdate
           ? new Date(
-              vehicle.lastUpdate.seconds
-                ? vehicle.lastUpdate.seconds * 1000
-                : vehicle.lastUpdate,
+              v.lastUpdate.seconds ? v.lastUpdate.seconds * 1000 : v.lastUpdate,
             ).toLocaleDateString()
           : "N/A",
-      ];
-      tableRows.push(vehicleData);
-    });
-
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-    });
-
-    doc.save("vehiculos_vista_actual.pdf");
-  };
+    },
+  ];
 
   return (
     <div className="p-6 space-y-5">
@@ -101,15 +83,13 @@ export default function VehicleView() {
           </p>
         </div>
         <div className="flex gap-2">
-          {/* Botón para descargar PDF */}
-          <button
-            onClick={exportToPDF}
-            disabled={loading || filtered.length === 0}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#EFCC01] text-[#2D1E2F] rounded-xl hover:bg-[#F2D72B] transition-colors font-medium text-sm disabled:opacity-50 disabled:pointer-events-none"
-          >
-            <FileText className="w-4 h-4" />
-            Descargar PDF
-          </button>
+          <ExportDropdown
+            data={filtered}
+            columns={exportColumns}
+            fileName="vehiculos_vista_actual"
+            title="Reporte de Vehículos"
+            disabled={loading}
+          />
 
           {/*Boton para añadir vehiculo */}
           <button
