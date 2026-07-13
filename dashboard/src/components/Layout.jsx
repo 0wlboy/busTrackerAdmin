@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import ExitModal from "./modals/ExitModal";
 import {
   LayoutDashboard,
   Users,
@@ -31,6 +32,7 @@ export default function Layout() {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isExitModalOpen, setIsExitModalOpen] = useState(false);
 
   // Auto-colapsar cuando el ancho de la ventana baja de 1024 px
   useEffect(() => {
@@ -145,7 +147,7 @@ export default function Layout() {
           )}
         </div>
         <button
-          onClick={handleLogout}
+          onClick={() => setIsExitModalOpen(true)}
           className={`flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-white/50 hover:bg-white/10 hover:text-white transition-all text-sm cursor-pointer ${
             collapsed ? "justify-center" : ""
           }`}
@@ -214,6 +216,13 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      <ExitModal
+        isOpen={isExitModalOpen}
+        onClose={() => setIsExitModalOpen(false)}
+        onConfirm={handleLogout}
+      />
     </div>
   );
 }
