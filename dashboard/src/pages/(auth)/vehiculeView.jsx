@@ -34,6 +34,8 @@ export default function VehicleView() {
 
   // Filtramos en el cliente (búsqueda de texto)
   const filtered = vehicles.filter((v) => {
+    if (v.isDeleted === true) return false;
+
     const route = v.routeId || v.route || "Sin ruta";
     const driverId = v.driverId || "Sin conductor";
     const cedula = cedulas[v.driverId] || "";
@@ -153,13 +155,16 @@ export default function VehicleView() {
                 <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
                   Registrado
                 </th>
+                <th className="text-right text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
+                  Acciones
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#2D1E2F]/8">
               {!loading && filtered.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="text-center text-[#2D1E2F]/40 py-12 text-sm"
                   >
                     No se encontraron vehículos en esta página
@@ -211,6 +216,14 @@ export default function VehicleView() {
                                 : v.createdAt,
                             ).toLocaleDateString()
                           : "N/A"}
+                      </td>
+                      <td className="px-5 py-4 text-right text-sm">
+                        <button
+                          onClick={() => navigate(`/vehiculos/${v.id}/editar`)}
+                          className="px-3 py-1.5 bg-[#EFCC01]/10 text-[#2D1E2F] hover:bg-[#EFCC01] hover:text-[#2D1E2F] rounded-lg transition-colors text-xs font-semibold cursor-pointer border border-[#EFCC01]/25"
+                        >
+                          Editar
+                        </button>
                       </td>
                     </tr>
                   );

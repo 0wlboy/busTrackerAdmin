@@ -7,5 +7,5 @@ export { usePaginatedVehicles } from "./usePaginatedVehicles";
 export { useGetPrice } from "./useGetPrice";
 export { useAddPrice } from "./useAddPrice";
 export { useGetTracking } from "./useGetTracking";
-
-
+export { useUpdateVehicle } from "./useUpdateVehicle";
+export { useUpdateUser } from "./useUpdateUser";

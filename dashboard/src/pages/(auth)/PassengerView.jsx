@@ -50,15 +50,15 @@ export default function DriverView() {
 
   // Filtramos en el cliente (búsqueda de texto y estado) sobre los resultados de la página actual
   const filtered = users.filter((u) => {
-    const userName = u.userName || "Sin nombre";
-    const userEmail = u.email || "Sin correo";
-    const userCedula = u.cedula || "";
+    if (u.isDeleted === true) return false;
 
+    // Filtro por búsqueda de texto
     const matchSearch =
-      userName.toLowerCase().includes(search.toLowerCase()) ||
-      userEmail.toLowerCase().includes(search.toLowerCase()) ||
-      userCedula.toLowerCase().includes(search.toLowerCase());
+      u.userName?.toLowerCase().includes(search.toLowerCase()) ||
+      u.email?.toLowerCase().includes(search.toLowerCase()) ||
+      u.cedula?.toLowerCase().includes(search.toLowerCase());
 
+    // Filtro por estado local
     const matchStatus =
       filterStatus === "Todos" ||
       (filterStatus === "Activo" ? u.isOnline === true : u.isOnline === false);
@@ -233,13 +233,16 @@ export default function DriverView() {
                 <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
                   Último acceso
                 </th>
+                <th className="text-right text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
+                  Acciones
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#2D1E2F]/8">
               {!loading && filtered.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="text-center text-[#2D1E2F]/40 py-12 text-sm"
                   >
                     No se encontraron pasajeros en esta página
@@ -316,6 +319,14 @@ export default function DriverView() {
                                 : user.lastLogin,
                             ).toLocaleDateString()
                           : "N/A"}
+                      </td>
+                      <td className="px-5 py-4 text-right text-sm">
+                        <button
+                          onClick={() => navigate(`/usuarios/${user.id}/editar`)}
+                          className="px-3 py-1.5 bg-[#EFCC01]/10 text-[#2D1E2F] hover:bg-[#EFCC01] hover:text-[#2D1E2F] rounded-lg transition-colors text-xs font-semibold cursor-pointer border border-[#EFCC01]/25"
+                        >
+                          Editar
+                        </button>
                       </td>
                     </tr>
                   );

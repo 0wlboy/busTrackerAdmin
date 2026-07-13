@@ -10,10 +10,10 @@ import {
   Loader2,
   Calendar,
   Clock,
-  ArrowRight,
   Coins,
   AlertCircle,
 } from "lucide-react";
+import ExportDropdown from "../../components/ExportDropdown.jsx";
 
 export default function TicketPrice() {
   const { prices, loading, error: getPriceError } = useGetPrice();
@@ -133,6 +133,31 @@ export default function TicketPrice() {
 
   // Calcular la variación del precio actual
   const currentChange = calculateChange(currentActualPrice, currentPrevPrice);
+
+  const exportColumns = [
+    {
+      header: "Fecha",
+      getValue: (item) => `${formatDate(item.createdAt)} ${formatTime(item.createdAt)}`,
+    },
+    {
+      header: "Precio Anterior",
+      getValue: (item) =>
+        item.prevPrice !== undefined
+          ? `Bs ${item.prevPrice.toFixed(2)}`
+          : "Bs 0.00",
+    },
+    {
+      header: "Nuevo Precio",
+      getValue: (item) =>
+        item.actualPrice !== undefined
+          ? `Bs ${item.actualPrice.toFixed(2)}`
+          : "Bs 0.00",
+    },
+    {
+      header: "Variación",
+      getValue: (item) => calculateChange(item.actualPrice, item.prevPrice).text,
+    },
+  ];
 
   return (
     <div className="p-6 space-y-6">
@@ -294,9 +319,18 @@ export default function TicketPrice() {
                   Registro histórico de modificaciones en el precio del ticket
                 </p>
               </div>
-              <span className="bg-[#2D1E2F] text-[#EFCC01] text-xs font-semibold px-2.5 py-1 rounded-full">
-                {prices.length} Cambios
-              </span>
+              <div className="flex items-center gap-3">
+                <ExportDropdown
+                  data={prices}
+                  columns={exportColumns}
+                  fileName="historial_tarifas"
+                  title="Historial de Tarifas"
+                  disabled={loading}
+                />
+                <span className="bg-[#2D1E2F] text-[#EFCC01] text-xs font-semibold px-2.5 py-1 rounded-full shrink-0">
+                  {prices.length} Cambios
+                </span>
+              </div>
             </div>
 
             <div className="overflow-x-auto relative">
