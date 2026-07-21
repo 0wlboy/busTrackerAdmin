@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUpdateUser } from "../../hooks/exporter";
+import DeleteModal from "../../components/modals/DeleteModal";
 import {
   ArrowLeft,
   Check,
@@ -35,6 +36,7 @@ export default function UpdateUser() {
   const [originalForm, setOriginalForm] = useState(null);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Cargar datos iniciales del usuario
   useEffect(() => {
@@ -142,19 +144,18 @@ export default function UpdateUser() {
     }
   };
 
-  const handleDelete = async () => {
-    if (
-      !window.confirm(
-        "¿Estás completamente seguro de que deseas eliminar este usuario?",
-      )
-    ) {
-      return;
-    }
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
     const result = await deleteUser(id);
     if (result.success) {
+      setShowDeleteModal(false);
       setSubmitted(true);
       setTimeout(() => navigate(-1), 1500);
     } else {
+      setShowDeleteModal(false);
       setSubmitError(result.error?.message || "Error al eliminar el usuario.");
     }
   };
@@ -377,6 +378,12 @@ export default function UpdateUser() {
           </button>
         </div>
       </form>
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        loading={saving}
+      />
     </div>
   );
 }

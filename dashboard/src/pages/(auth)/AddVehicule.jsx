@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGetRoutes, useAddVehicle } from "../../hooks/exporter";
+import { useGetRoutes, useAddVehicle, useAvailableDrivers } from "../../hooks/exporter";
+import DriverSearchInput from "../../components/ui/DriverSearchInput";
 import {
   ArrowLeft,
   Check,
@@ -17,8 +18,8 @@ export default function AddVehicule() {
 
   // Hooks
   const { routes, loading: loadingRoutes } = useGetRoutes();
-
   const { addVehicle } = useAddVehicle();
+  const { drivers: availableDrivers, loading: loadingDrivers } = useAvailableDrivers();
 
   const [submitted, setSubmitted] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -232,30 +233,19 @@ export default function AddVehicule() {
             )}
           </div>
 
-          {/* Driver ID */}
+          {/* Driver Search */}
           <div className="sm:col-span-2">
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              ID del Conductor *
+              Conductor *
             </label>
-            <input
-              type="text"
+            <DriverSearchInput
               value={form.driverId}
-              onChange={(e) => setField("driverId", e.target.value)}
-              placeholder="Pega el UID del usuario aquí..."
-              className={inputClass(!!errors.driverId)}
+              onChange={(id) => setField("driverId", id)}
+              drivers={availableDrivers}
+              loading={loadingDrivers}
+              hasError={!!errors.driverId}
+              error={errors.driverId}
             />
-            <p className="text-[#2D1E2F]/40 text-xs mt-1">
-              El usuario debe existir y tener el rol de conductor.
-            </p>
-            {errors.driverId && (
-              <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
-                <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
-                <div>
-                  <span className="font-semibold block">Alerta en ID del Conductor</span>
-                  <span>{errors.driverId}</span>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Plate */}
