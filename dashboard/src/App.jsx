@@ -22,6 +22,8 @@ import {
   Maps,
   UpdateVehicle,
   UpdateUser,
+  ProfileAdmin,
+  UpdateAdmin,
 } from "./pages/(auth)/exporter";
 
 /**
@@ -77,6 +79,8 @@ function App() {
             <Route path="/maps" element={<Maps />} />
             <Route path="/vehiculos/:id/editar" element={<UpdateVehicle />} />
             <Route path="/usuarios/:id/editar" element={<UpdateUser />} />
+            <Route path="/admin/perfil" element={<ProfileAdmin />} />
+            <Route path="/admin/:id/editar" element={<UpdateAdmin />} />
           </Route>
 
           {/* Redirección para cualquier otra ruta no encontrada (404) */}

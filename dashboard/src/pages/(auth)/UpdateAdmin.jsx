@@ -1,25 +1,17 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import { useUpdateUser } from "../../hooks/exporter";
-import DeleteModal from "../../components/modals/DeleteModal";
-import {
-  ArrowLeft,
-  Check,
-  Loader2,
-  AlertCircle,
-  Trash2,
-  Save,
-} from "lucide-react";
+import { ArrowLeft, Check, Loader2, AlertCircle, Save } from "lucide-react";
 
-export default function UpdateUser() {
-  const { id } = useParams(); // ID/UID del usuario a editar
+export default function UpdateAdmin() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const id = currentUser?.uid;
 
-  // Hooks
   const {
     getUser,
     updateUser,
-    deleteUser,
     loading: saving,
     error: hookError,
   } = useUpdateUser();
@@ -28,81 +20,65 @@ export default function UpdateUser() {
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
     name: "",
-    email: "",
     cedula: "",
-    role: "",
     telefono: "",
   });
   const [originalForm, setOriginalForm] = useState(null);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  // Cargar datos iniciales del usuario
+  // Cargar datos iniciales del admin
   useEffect(() => {
-    async function loadUser() {
-      if (!id) return;
+    async function loadAdmin() {
+      if (!id) {
+        setInitialLoading(false);
+        return;
+      }
       const res = await getUser(id);
       if (res.success && res.data) {
         const loaded = {
           name: String(res.data.userName || ""),
-          email: String(res.data.email || ""),
           cedula: String(res.data.cedula ?? ""),
-          role: String(res.data.role || ""),
-          telefono: String(res.data.telefono || ""),
+          telefono: String(res.data.telefono || res.data.phone || ""),
         };
         setForm(loaded);
         setOriginalForm(loaded);
       } else {
         setSubmitError(
-          res.error?.message || "No se pudo cargar la información del usuario.",
+          res.error?.message || "No se pudo cargar la información del perfil.",
         );
       }
       setInitialLoading(false);
     }
-    loadUser();
+    loadAdmin();
   }, [id]);
 
   const validate = () => {
     const e = {};
-
-    // Expresiones regulares de validación
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const cedulaRegex = /^\d+$/;
     const phoneRegex = /^\+?[0-9\s\-]{7,15}$/;
 
     // Nombre completo
     if (!form.name.trim()) {
-      e.name =
-        "El nombre completo es requerido. Por favor, ingresa tu nombre y apellido.";
+      e.name = "El nombre completo es requerido.";
     } else if (form.name.trim().length < 2 || form.name.trim().length > 80) {
       e.name = "El nombre debe tener entre 2 y 80 caracteres.";
-    }
-
-    // Correo electrónico
-    if (!form.email.trim()) {
-      e.email =
-        "El correo electrónico es requerido. Ingresa una dirección válida.";
-    } else if (!emailRegex.test(form.email.trim())) {
-      e.email =
-        "El formato de correo no es válido. Asegúrate de incluir el carácter '@' y un dominio correcto (ej. nombre@correo.com).";
     }
 
     // Cédula
     const cedulaStr = String(form.cedula ?? "");
     if (!cedulaStr.trim()) {
-      e.cedula =
-        "La cédula es requerida. Por favor, ingresa tu documento de identidad.";
+      e.cedula = "La cédula es requerida.";
     } else if (!cedulaRegex.test(cedulaStr.trim())) {
       e.cedula =
-        "La cédula debe contener únicamente números. Remueve cualquier letra, espacio, guión o punto.";
+        "La cédula debe contener únicamente números. Remueve cualquier letra, espacio o guión.";
     }
 
     // Teléfono (opcional)
     const telefonoStr = String(form.telefono ?? "");
     if (telefonoStr.trim() && !phoneRegex.test(telefonoStr.trim())) {
       e.telefono =
-        "El número telefónico no es válido. Asegúrate de ingresar entre 7 y 15 dígitos numéricos (ej. +584120000000).";
+        "El número telefónico no es válido. Ingresa entre 7 y 15 dígitos (ej. +584120000000).";
     }
 
     return e;
@@ -112,12 +88,10 @@ export default function UpdateUser() {
     e.preventDefault();
     setSubmitError(null);
 
-    // Verificar que al menos un campo haya cambiado
+    // Verificar cambios
     const hasChanged =
       form.name.trim() !== (originalForm?.name || "") ||
-      form.email.trim() !== (originalForm?.email || "") ||
       form.cedula.trim() !== (originalForm?.cedula || "") ||
-      form.role !== (originalForm?.role || "") ||
       form.telefono.trim() !== (originalForm?.telefono || "");
 
     if (!hasChanged) {
@@ -128,35 +102,27 @@ export default function UpdateUser() {
     const errs = validate();
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
-      setSubmitError("Revisa los campos marcados en rojo antes de guardar.");
+      setSubmitError("Revisa los campos marcados antes de guardar.");
       return;
     }
 
-    const result = await updateUser(id, form);
+    // Obtener datos actuales del usuario para no sobreescribir email y role
+    const currentRes = await getUser(id);
+    const currentData = currentRes?.data || {};
+
+    const result = await updateUser(id, {
+      name: form.name,
+      email: currentData.email || "",
+      role: currentData.role || "admin",
+      telefono: form.telefono,
+      cedula: form.cedula,
+    });
 
     if (result.success) {
       setSubmitted(true);
-      console.log("se actualizo el usuario");
-      // Redirigir de regreso
       setTimeout(() => navigate(-1), 1500);
     } else {
       setSubmitError(result.error?.message || "Error al guardar los cambios.");
-    }
-  };
-
-  const handleDelete = () => {
-    setShowDeleteModal(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    const result = await deleteUser(id);
-    if (result.success) {
-      setShowDeleteModal(false);
-      setSubmitted(true);
-      setTimeout(() => navigate(-1), 1500);
-    } else {
-      setShowDeleteModal(false);
-      setSubmitError(result.error?.message || "Error al eliminar el usuario.");
     }
   };
 
@@ -172,15 +138,12 @@ export default function UpdateUser() {
         : "border-[#2D1E2F]/15 focus:border-[#EFCC01] focus:ring-[#EFCC01]/20"
     }`;
 
-  const selectClass =
-    "w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 text-[#2D1E2F] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#EFCC01] focus:ring-2 focus:ring-[#EFCC01]/20 transition-all";
-
   if (initialLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] p-6">
         <Loader2 className="w-10 h-10 text-[#EFCC01] animate-spin mb-4" />
         <span className="text-sm text-[#2D1E2F]/70 font-medium">
-          Cargando detalles del usuario...
+          Cargando datos del perfil...
         </span>
       </div>
     );
@@ -193,7 +156,9 @@ export default function UpdateUser() {
           <div className="w-16 h-16 rounded-full bg-[#EFCC01]/20 border border-[#EFCC01]/50 flex items-center justify-center mx-auto mb-4">
             <Check className="w-8 h-8 text-[#2D1E2F]" />
           </div>
-          <h2 className="text-[#2D1E2F] text-xl mb-2">Operación completada</h2>
+          <h2 className="text-[#2D1E2F] text-xl mb-2">
+            Perfil actualizado correctamente
+          </h2>
           <p className="text-[#2D1E2F]/50 text-sm">Redirigiendo...</p>
         </div>
       </div>
@@ -212,9 +177,11 @@ export default function UpdateUser() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-[#2D1E2F] text-2xl">Editar usuario</h1>
+          <h1 className="text-[#2D1E2F] text-2xl font-semibold">
+            Editar perfil
+          </h1>
           <p className="text-[#2D1E2F]/50 text-sm mt-0.5">
-            Modifica los detalles del perfil de usuario en el sistema
+            Modifica tu nombre, teléfono y cédula
           </p>
         </div>
       </div>
@@ -230,8 +197,9 @@ export default function UpdateUser() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div className="sm:col-span-2">
+        <div className="grid grid-cols-1 gap-5">
+          {/* Nombre */}
+          <div>
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
               Nombre completo
             </label>
@@ -255,31 +223,8 @@ export default function UpdateUser() {
             )}
           </div>
 
-          <div className="sm:col-span-2">
-            <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              Correo electrónico
-            </label>
-            <input
-              type="email"
-              value={form.email}
-              onChange={(e) => set("email", e.target.value)}
-              placeholder="usuario@empresa.com"
-              className={inputClass(!!errors.email)}
-            />
-            {errors.email && (
-              <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
-                <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
-                <div>
-                  <span className="font-semibold block">
-                    Alerta en correo electrónico
-                  </span>
-                  <span>{errors.email}</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="sm:col-span-2">
+          {/* Cédula */}
+          <div>
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
               Cédula
             </label>
@@ -301,6 +246,7 @@ export default function UpdateUser() {
             )}
           </div>
 
+          {/* Teléfono */}
           <div>
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
               Teléfono
@@ -324,32 +270,10 @@ export default function UpdateUser() {
               </div>
             )}
           </div>
-
-          <div>
-            <label className="block text-[#2D1E2F] text-sm mb-1.5">Rol</label>
-            <select
-              value={form.role}
-              onChange={(e) => set("role", e.target.value)}
-              className={selectClass}
-            >
-              <option value="Operador">Conductor</option>
-              <option value="Supervisor">Pasajero</option>
-              <option value="Administrador">Administrador</option>
-            </select>
-          </div>
         </div>
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-[#2D1E2F]/10 mt-6">
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={saving}
-            className="w-full sm:w-auto px-4 py-3 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-red-600/10"
-          >
-            <Trash2 className="w-4 h-4" />
-            Eliminar Usuario
-          </button>
           <div className="hidden sm:block flex-1" />
           <button
             type="button"
@@ -378,12 +302,6 @@ export default function UpdateUser() {
           </button>
         </div>
       </form>
-      <DeleteModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleConfirmDelete}
-        loading={saving}
-      />
     </div>
   );
 }

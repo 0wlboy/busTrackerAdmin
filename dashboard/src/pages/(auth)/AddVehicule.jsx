@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGetRoutes, useAddVehicle, useAvailableDrivers } from "../../hooks/exporter";
+import {
+  useGetRoutes,
+  useAddVehicle,
+  useAvailableDrivers,
+} from "../../hooks/exporter";
 import DriverSearchInput from "../../components/ui/DriverSearchInput";
 import {
   ArrowLeft,
@@ -19,7 +23,8 @@ export default function AddVehicule() {
   // Hooks
   const { routes, loading: loadingRoutes } = useGetRoutes();
   const { addVehicle } = useAddVehicle();
-  const { drivers: availableDrivers, loading: loadingDrivers } = useAvailableDrivers();
+  const { drivers: availableDrivers, loading: loadingDrivers } =
+    useAvailableDrivers();
 
   const [submitted, setSubmitted] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -46,23 +51,29 @@ export default function AddVehicule() {
     const plateRegex = /^[a-zA-Z0-9\-]{5,10}$/;
 
     if (!form.driverId.trim()) {
-      e.driverId = "El ID del conductor es requerido. Por favor, ingresa el identificador único (UID) del conductor registrado.";
+      e.driverId =
+        "El ID del conductor es requerido. Por favor, ingresa el identificador único (UID) del conductor registrado.";
     }
     if (!form.plate.trim()) {
-      e.plate = "La placa del vehículo es requerida. Por favor, escribe la combinación alfanumérica oficial.";
+      e.plate =
+        "La placa del vehículo es requerida. Por favor, escribe la combinación alfanumérica oficial.";
     } else if (!plateRegex.test(form.plate.trim())) {
-      e.plate = "El formato de la placa no es válido o no cumple con la longitud. Debe tener entre 5 y 10 caracteres y contener solo letras, números o guion (ej. ABC-1234).";
+      e.plate =
+        "El formato de la placa no es válido o no cumple con la longitud. Debe tener entre 5 y 10 caracteres y contener solo letras, números o guion (ej. ABC-1234).";
     }
     if (!form.routeId) {
-      e.routeId = "Debes seleccionar una ruta. Asigna una ruta del menú desplegable para continuar.";
+      e.routeId =
+        "Debes seleccionar una ruta. Asigna una ruta del menú desplegable para continuar.";
     }
     if (!form.seats) {
       e.seats = "La cantidad de asientos es requerida.";
     } else if (isNaN(form.seats) || Number(form.seats) <= 0) {
-      e.seats = "La cantidad de asientos debe ser un número entero positivo válido mayor a cero. Por favor, corrígelo.";
+      e.seats =
+        "La cantidad de asientos debe ser un número entero positivo válido mayor a cero. Por favor, corrígelo.";
     }
     if (!form.imageFile) {
-      e.imageFile = "Debes subir una foto del vehículo. Selecciona una imagen desde tus archivos para poder identificar la unidad.";
+      e.imageFile =
+        "Debes subir una foto del vehículo. Selecciona una imagen desde tus archivos para poder identificar la unidad.";
     }
     return e;
   };
@@ -113,15 +124,24 @@ export default function AddVehicule() {
       setTimeout(() => navigate("/vehicle-view"), 1500);
     } catch (err) {
       const msg = err.message || "";
-      if (msg.includes("conductor ya tiene un vehículo") || msg.includes("already has")) {
+      if (
+        msg.includes("conductor ya tiene un vehículo") ||
+        msg.includes("already has")
+      ) {
         setErrors((prev) => ({
           ...prev,
-          driverId: "Este conductor ya tiene un vehículo asignado. Para solucionarlo, ingresa el UID de un conductor diferente sin asignaciones.",
+          driverId:
+            "Este conductor ya tiene un vehículo asignado. Para solucionarlo, ingresa el UID de un conductor diferente sin asignaciones.",
         }));
-      } else if (msg.includes("no existe") || msg.includes("not exist") || msg.includes("not found")) {
+      } else if (
+        msg.includes("no existe") ||
+        msg.includes("not exist") ||
+        msg.includes("not found")
+      ) {
         setErrors((prev) => ({
           ...prev,
-          driverId: "El ID del conductor ingresado no existe en la base de datos de usuarios. Por favor, verifica el UID o regístralo primero.",
+          driverId:
+            "El ID del conductor ingresado no existe en la base de datos de usuarios. Por favor, verifica el UID o regístralo primero.",
         }));
       } else {
         setSubmitError(msg);
@@ -226,7 +246,9 @@ export default function AddVehicule() {
               <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
                 <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                 <div>
-                  <span className="font-semibold block">Alerta en foto del vehículo</span>
+                  <span className="font-semibold block">
+                    Alerta en foto del vehículo
+                  </span>
                   <span>{errors.imageFile}</span>
                 </div>
               </div>
@@ -267,7 +289,9 @@ export default function AddVehicule() {
               <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
                 <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                 <div>
-                  <span className="font-semibold block">Alerta en placa del vehículo</span>
+                  <span className="font-semibold block">
+                    Alerta en placa del vehículo
+                  </span>
                   <span>{errors.plate}</span>
                 </div>
               </div>
@@ -291,7 +315,9 @@ export default function AddVehicule() {
               <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
                 <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                 <div>
-                  <span className="font-semibold block">Alerta en cantidad de asientos</span>
+                  <span className="font-semibold block">
+                    Alerta en cantidad de asientos
+                  </span>
                   <span>{errors.seats}</span>
                 </div>
               </div>
@@ -345,7 +371,7 @@ export default function AddVehicule() {
           <button
             type="submit"
             disabled={uploading}
-            className="flex-1 bg-[#EFCC01] hover:bg-[#EFCC01]/85 text-[#2D1E2F] rounded-xl px-4 py-3 text-sm flex items-center justify-center gap-2 transition-colors shadow-md shadow-[#EFCC01]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-[#EFCC01] hover:bg-[#EFCC01]/50 text-[#2D1E2F] rounded-xl px-4 py-3 text-sm flex items-center justify-center gap-2 transition-colors shadow-md shadow-[#EFCC01]/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {uploading ? (
               <>

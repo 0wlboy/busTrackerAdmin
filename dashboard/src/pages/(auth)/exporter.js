@@ -10,4 +10,5 @@ export { default as TicketPrice } from "./TicketPrice";
 export { default as Maps } from "./Maps";
 export { default as UpdateVehicle } from "./UpdateVehicle";
 export { default as UpdateUser } from "./UpdateUser";
-
+export { default as ProfileAdmin } from "./ProfileAdmin";
+export { default as UpdateAdmin } from "./UpdateAdmin";

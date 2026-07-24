@@ -10,7 +10,6 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronRight,
   Bus,
   Ticket,
   Navigation2,
@@ -129,23 +128,57 @@ export default function Layout() {
 
       {/* User / Logout */}
       <div className="px-3 py-4 border-t border-white/10">
-        <div
-          className={`flex items-center gap-3 px-3 py-2.5 mb-2 ${collapsed ? "justify-center" : ""}`}
+        <NavLink
+          to="/admin/perfil"
+          onClick={() => setMobileOpen(false)}
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-3 py-2.5 mb-2 rounded-xl transition-all group cursor-pointer ${
+              collapsed ? "justify-center" : ""
+            } ${
+              isActive
+                ? "bg-[#EFCC01] text-[#2D1E2F]"
+                : "hover:bg-white/10 text-white/80 hover:text-white"
+            }`
+          }
         >
-          <div className="w-8 h-8 rounded-full bg-[#EFCC01]/20 border border-[#EFCC01]/40 flex items-center justify-center shrink-0 overflow-hidden">
-            <span className="text-[#EFCC01] text-xs font-bold uppercase">
-              {currentUser?.email ? currentUser.email.substring(0, 2) : "AD"}
-            </span>
-          </div>
-          {!collapsed && (
-            <div className="flex-1 min-w-0">
-              <p className="text-white text-sm truncate">
-                {currentUser?.email || "Usuario"}
-              </p>
-              <p className="text-white/40 text-xs truncate">Administrador</p>
-            </div>
+          {({ isActive }) => (
+            <>
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 overflow-hidden ${
+                  isActive
+                    ? "bg-[#2D1E2F]/20 border border-[#2D1E2F]/40"
+                    : "bg-[#EFCC01]/20 border border-[#EFCC01]/40"
+                }`}
+              >
+                <span
+                  className={`text-xs font-bold uppercase ${
+                    isActive ? "text-[#2D1E2F]" : "text-[#EFCC01]"
+                  }`}
+                >
+                  {currentUser?.email ? currentUser.email.substring(0, 2) : "AD"}
+                </span>
+              </div>
+              {!collapsed && (
+                <div className="flex-1 min-w-0">
+                  <p
+                    className={`text-sm truncate font-medium ${
+                      isActive ? "text-[#2D1E2F]" : "text-white"
+                    }`}
+                  >
+                    {currentUser?.email || "Usuario"}
+                  </p>
+                  <p
+                    className={`text-xs truncate ${
+                      isActive ? "text-[#2D1E2F]/70" : "text-white/40"
+                    }`}
+                  >
+                    Administrador
+                  </p>
+                </div>
+              )}
+            </>
           )}
-        </div>
+        </NavLink>
         <button
           onClick={() => setIsExitModalOpen(true)}
           className={`flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-white/50 hover:bg-white/10 hover:text-white transition-all text-sm cursor-pointer ${

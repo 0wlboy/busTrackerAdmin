@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useGetRoutes, useUpdateVehicle, useAvailableDrivers } from "../../hooks/exporter";
+import {
+  useGetRoutes,
+  useUpdateVehicle,
+  useAvailableDrivers,
+} from "../../hooks/exporter";
 import DriverSearchInput from "../../components/ui/DriverSearchInput";
 import {
   ArrowLeft,
@@ -46,7 +50,8 @@ export default function UpdateVehicle() {
   const [submitError, setSubmitError] = useState(null);
 
   // excludeDriverId: el conductor actual puede seguir siendo elegido
-  const { drivers: availableDrivers, loading: loadingDrivers } = useAvailableDrivers(currentDriverId);
+  const { drivers: availableDrivers, loading: loadingDrivers } =
+    useAvailableDrivers(currentDriverId);
 
   // Cargar datos iniciales del vehículo
   useEffect(() => {
@@ -359,7 +364,8 @@ export default function UpdateVehicle() {
               error={errors.driverId}
             />
             <p className="text-[#2D1E2F]/40 text-xs mt-1">
-              Solo se muestran conductores sin vehículo asignado. Si se cambia, se transferirá el vehículo.
+              Solo se muestran conductores sin vehículo asignado. Si se cambia,
+              se transferirá el vehículo.
             </p>
           </div>
 
@@ -473,7 +479,7 @@ export default function UpdateVehicle() {
           <button
             type="submit"
             disabled={uploading || saving}
-            className="w-full sm:w-auto bg-[#EFCC01] hover:bg-[#EFCC01]/85 text-[#2D1E2F] rounded-xl px-4 py-3 text-sm flex items-center justify-center gap-2 transition-colors shadow-md shadow-[#EFCC01]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto bg-[#EFCC01] hover:bg-[#EFCC01]/50 text-[#2D1E2F] rounded-xl px-4 py-3 text-sm flex items-center justify-center gap-2 transition-colors shadow-md shadow-[#EFCC01]/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {uploading || saving ? (
               <>

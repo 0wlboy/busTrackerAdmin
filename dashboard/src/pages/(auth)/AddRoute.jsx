@@ -172,7 +172,7 @@ export default function AddRoute() {
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center gap-2 bg-[#EFCC01] hover:bg-[#EFCC01]/85 text-[#2D1E2F] px-6 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-md shadow-[#EFCC01]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 bg-[#EFCC01] hover:bg-[#EFCC01]/50 text-[#2D1E2F] px-6 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-md shadow-[#EFCC01]/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
