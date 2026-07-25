@@ -6,8 +6,8 @@ import { Eye, EyeOff, LogIn, AlertCircle } from "lucide-react";
 export default function Login() {
   const { login, currentUser } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("admin@empresa.com");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
@@ -29,15 +29,19 @@ export default function Login() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!email.trim()) {
-      newErrors.email = "El correo electrónico es requerido. Por favor, escribe tu dirección de correo electrónico.";
+      newErrors.email =
+        "El correo electrónico es requerido. Por favor, escribe tu dirección de correo electrónico.";
     } else if (!emailRegex.test(email.trim())) {
-      newErrors.email = "El formato del correo electrónico no es válido. Asegúrate de incluir el símbolo '@' y un dominio válido (ej. usuario@empresa.com).";
+      newErrors.email =
+        "El formato del correo electrónico no es válido. Asegúrate de incluir el símbolo '@' y un dominio válido (ej. usuario@empresa.com).";
     }
 
     if (!password) {
-      newErrors.password = "La contraseña es requerida. Por favor, escribe la clave de acceso.";
+      newErrors.password =
+        "La contraseña es requerida. Por favor, escribe la clave de acceso.";
     } else if (password.length < 6) {
-      newErrors.password = "La contraseña debe tener al menos 6 caracteres. Si olvidaste tu contraseña, usa el enlace de recuperación.";
+      newErrors.password =
+        "La contraseña debe tener al menos 6 caracteres. Si olvidaste tu contraseña, usa el enlace de recuperación.";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -54,21 +58,36 @@ export default function Login() {
       console.error("Error detallado durante el login:", err);
       const code = err.code || "";
       const msg = err.message || "";
-      
-      if (code === "auth/user-not-found" || code === "auth/invalid-credential" || msg.includes("no existe") || msg.includes("not-found")) {
+
+      if (
+        code === "auth/user-not-found" ||
+        code === "auth/invalid-credential" ||
+        msg.includes("no existe") ||
+        msg.includes("not-found")
+      ) {
         setErrors((prev) => ({
           ...prev,
-          email: "No se encontró ningún usuario con este correo electrónico. Por favor, verifica la dirección ingresada o regístrate.",
+          email:
+            "No se encontró ningún usuario con este correo electrónico. Por favor, verifica la dirección ingresada o regístrate.",
         }));
-      } else if (code === "auth/wrong-password" || msg.includes("contraseña es incorrecta")) {
+      } else if (
+        code === "auth/wrong-password" ||
+        msg.includes("contraseña es incorrecta")
+      ) {
         setErrors((prev) => ({
           ...prev,
-          password: "La contraseña ingresada es incorrecta. Asegúrate de respetar mayúsculas y minúsculas, o restablece tu contraseña.",
+          password:
+            "La contraseña ingresada es incorrecta. Asegúrate de respetar mayúsculas y minúsculas, o restablece tu contraseña.",
         }));
       } else if (code === "auth/too-many-requests") {
-        setSubmitError("Se ha bloqueado temporalmente el acceso a esta cuenta debido a múltiples intentos fallidos. Intenta recuperar la contraseña o espera unos minutos.");
+        setSubmitError(
+          "Se ha bloqueado temporalmente el acceso a esta cuenta debido a múltiples intentos fallidos. Intenta recuperar la contraseña o espera unos minutos.",
+        );
       } else {
-        setSubmitError("Error al iniciar sesión: " + (err.message || "Error desconocido. Por favor, intenta de nuevo."));
+        setSubmitError(
+          "Error al iniciar sesión: " +
+            (err.message || "Error desconocido. Por favor, intenta de nuevo."),
+        );
       }
       setLoading(false);
     }
@@ -141,7 +160,9 @@ export default function Login() {
                 <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
                   <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                   <div>
-                    <span className="font-semibold block">Alerta en correo electrónico</span>
+                    <span className="font-semibold block">
+                      Alerta en correo electrónico
+                    </span>
                     <span>{errors.email}</span>
                   </div>
                 </div>
@@ -184,7 +205,9 @@ export default function Login() {
                 <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
                   <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                   <div>
-                    <span className="font-semibold block">Alerta en contraseña</span>
+                    <span className="font-semibold block">
+                      Alerta en contraseña
+                    </span>
                     <span>{errors.password}</span>
                   </div>
                 </div>

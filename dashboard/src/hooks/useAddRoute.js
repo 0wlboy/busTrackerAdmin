@@ -25,6 +25,7 @@ export function useAddRoute() {
         destination: routeData.destination,
         status: routeData.status || "active",
         createdAt: new Date().toISOString(),
+        isDeleted: false,
       };
 
       console.log(

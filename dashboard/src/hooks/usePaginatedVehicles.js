@@ -38,38 +38,50 @@ export function usePaginatedVehicles({
   const [firstVisible, setFirstVisible] = useState(null);
   const [lastVisible, setLastVisible] = useState(null);
 
-  // Mapeo de cédulas de conductores
+  // Mapeo de cédulas y datos completos de conductores
   const [cedulas, setCedulas] = useState({});
+  const [driversDetails, setDriversDetails] = useState({});
 
   useEffect(() => {
-    const fetchCedulas = async () => {
+    const fetchDriverInfo = async () => {
       if (!vehicles || vehicles.length === 0) return;
 
       const newCedulas = { ...cedulas };
+      const newDrivers = { ...driversDetails };
       let updated = false;
 
       for (const v of vehicles) {
         const dId = v.driverId;
-        if (dId && !newCedulas[dId]) {
+        if (dId && !newDrivers[dId]) {
           try {
             // Intentar primero en la colección "users"
             const docRef = doc(db, "users", dId);
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
-              newCedulas[dId] = docSnap.data().cedula || "Sin cédula";
+              const data = docSnap.data();
+              const c = data.cedula ? String(data.cedula) : "Sin cédula";
+              const n = data.userName || data.name || "Sin nombre";
+              newCedulas[dId] = c;
+              newDrivers[dId] = { name: n, cedula: c };
             } else {
-              // Intentar en la colección "driver" como fallback / opción indicada en la solicitud
+              // Intentar en la colección "driver" como fallback
               const driverRef = doc(db, "driver", dId);
               const driverSnap = await getDoc(driverRef);
               if (driverSnap.exists()) {
-                newCedulas[dId] = driverSnap.data().cedula || "Sin cédula";
+                const data = driverSnap.data();
+                const c = data.cedula ? String(data.cedula) : "Sin cédula";
+                const n = data.userName || data.name || "Sin nombre";
+                newCedulas[dId] = c;
+                newDrivers[dId] = { name: n, cedula: c };
               } else {
                 newCedulas[dId] = "No encontrado";
+                newDrivers[dId] = { name: "Desconocido", cedula: "N/A" };
               }
             }
           } catch (err) {
-            console.error(`Error al obtener cédula del conductor ${dId}:`, err);
+            console.error(`Error al obtener info del conductor ${dId}:`, err);
             newCedulas[dId] = "Error";
+            newDrivers[dId] = { name: "Error", cedula: "Error" };
           }
           updated = true;
         }
@@ -77,10 +89,11 @@ export function usePaginatedVehicles({
 
       if (updated) {
         setCedulas(newCedulas);
+        setDriversDetails(newDrivers);
       }
     };
 
-    fetchCedulas();
+    fetchDriverInfo();
   }, [vehicles]);
 
   // Derivados
@@ -259,5 +272,6 @@ export function usePaginatedVehicles({
     prevPage,
     refresh,
     cedulas,
+    driversDetails,
   };
 }

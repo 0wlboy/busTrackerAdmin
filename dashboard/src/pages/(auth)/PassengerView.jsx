@@ -53,10 +53,18 @@ export default function DriverView() {
     if (u.isDeleted === true) return false;
 
     // Filtro por búsqueda de texto
+    const searchTerm = search.toLowerCase().trim();
+    const userName = String(u.userName || u.name || "").toLowerCase();
+    const userEmail = String(u.email || "").toLowerCase();
+    const userCedula = String(u.cedula ?? "").toLowerCase();
+    const userPhone = String(u.telefono || u.phone || "").toLowerCase();
+
     const matchSearch =
-      u.userName?.toLowerCase().includes(search.toLowerCase()) ||
-      u.email?.toLowerCase().includes(search.toLowerCase()) ||
-      u.cedula?.toLowerCase().includes(search.toLowerCase());
+      !searchTerm ||
+      userName.includes(searchTerm) ||
+      userEmail.includes(searchTerm) ||
+      userCedula.includes(searchTerm) ||
+      userPhone.includes(searchTerm);
 
     // Filtro por estado local
     const matchStatus =
@@ -69,6 +77,7 @@ export default function DriverView() {
   const exportColumns = [
     { header: "Usuario", getValue: (user) => user.userName || "Sin nombre" },
     { header: "Cédula", getValue: (user) => user.cedula || "N/A" },
+    { header: "Teléfono", getValue: (user) => user.telefono || user.phone || "N/A" },
     { header: "Correo", getValue: (user) => user.email || "Sin correo" },
     { header: "Conexión", getValue: (user) => user.isOnline ? "Conectado" : "Desconectado" },
     {
@@ -119,7 +128,7 @@ export default function DriverView() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#2D1E2F]/30" />
             <input
               type="text"
-              placeholder="Buscar por nombre o correo en esta página..."
+              placeholder="Buscar por nombre, cédula, teléfono o correo..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 text-[#2D1E2F] placeholder-[#2D1E2F]/30 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#EFCC01] focus:ring-2 focus:ring-[#EFCC01]/20 transition-all"
@@ -225,6 +234,9 @@ export default function DriverView() {
                   Cédula
                 </th>
                 <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
+                  Teléfono
+                </th>
+                <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
                   Conexión
                 </th>
                 <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
@@ -287,6 +299,9 @@ export default function DriverView() {
                         <span className="text-xs font-mono bg-[#2D1E2F]/5 px-2 py-1 rounded">
                           {user.cedula || "N/A"}
                         </span>
+                      </td>
+                      <td className="px-5 py-4 text-[#2D1E2F]/50 text-sm font-mono">
+                        {user.telefono || user.phone || "N/A"}
                       </td>
                       <td className="px-5 py-4">
                         <span

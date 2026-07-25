@@ -18,9 +18,10 @@ import { usePaginatedVehicles } from "../../hooks/usePaginatedVehicles";
 import { usePaginatedUsers } from "../../hooks/usePaginatedUsers";
 import { useGetRoutes } from "../../hooks/useGetRoutes";
 import { useGetTracking } from "../../hooks/useGetTracking";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Home() {
-  //const { currentUser } = useAuth();
+  const { currentUser } = useAuth();
 
   // Conteos reales de vehículos desde Firestore
   const { totalCount: vehiclesLength, activeVehicleCount: activeVehicles } =
@@ -157,7 +158,7 @@ export default function Home() {
         <p className="text-[#2D1E2F]/60 text-sm mt-2">
           Bienvenido{" "}
           <strong>
-            {/*currentUser ? currentUser?.email : */ "admin@empresa.com"}
+            {currentUser ? currentUser?.email : "admin@empresa.com"}
           </strong>
         </p>
       </div>

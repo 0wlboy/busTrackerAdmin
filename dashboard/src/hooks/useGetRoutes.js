@@ -25,6 +25,9 @@ export function useGetRoutes() {
       for (const routeDoc of routesSnapshot.docs) {
         const routeId = routeDoc.id;
         const routeData = routeDoc.data();
+
+        if (routeData.isDeleted === true) continue;
+
         let totalVehicles = 0;
         let activeVehicles = 0;
 

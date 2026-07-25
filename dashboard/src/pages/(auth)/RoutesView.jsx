@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/config";
 import { useGetRoutes } from "../../hooks/useGetRoutes";
+import DeleteModal from "../../components/modals/DeleteModal";
 import {
   Search,
   Plus,
@@ -12,6 +13,7 @@ import {
   MapPin,
   Truck,
   Loader2,
+  Trash2,
 } from "lucide-react";
 
 const STATUSES = ["Todos", "Activa", "Inactiva"];
@@ -23,6 +25,11 @@ export default function RoutesPage() {
   const [filterStatus, setFilterStatus] = useState("Todos");
   const [showFilters, setShowFilters] = useState(false);
   const [updating, setUpdating] = useState(null);
+
+  // Estados para eliminación de ruta
+  const [routeToDelete, setRouteToDelete] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleToggleStatus = async (routeId, currentStatus) => {
     if (updating) return;
@@ -40,7 +47,26 @@ export default function RoutesPage() {
     }
   };
 
+  const handleConfirmDelete = async () => {
+    if (!routeToDelete) return;
+    setDeleting(true);
+    try {
+      const routeRef = doc(db, "vehicleRoutes", routeToDelete.id);
+      await updateDoc(routeRef, { isDeleted: true });
+      setShowDeleteModal(false);
+      setRouteToDelete(null);
+      refresh();
+    } catch (err) {
+      console.error("Error al eliminar ruta:", err);
+      alert("Hubo un error al eliminar la ruta.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const filtered = routes.filter((r) => {
+    if (r.isDeleted === true) return false;
+
     const routeName = r.name || "";
     const routeOrigin = r.origin || "";
     const routeDest = r.destination || "";
@@ -171,28 +197,41 @@ export default function RoutesPage() {
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-[#2D1E2F] text-base">{route.name}</h3>
+                    <h3 className="text-[#2D1E2F] text-base font-semibold">{route.name}</h3>
                     <p className="text-[#2D1E2F]/40 text-xs mt-0.5">
                       {route.distance}
                     </p>
                   </div>
-                  <button
-                    onClick={() => handleToggleStatus(route.id, route.status)}
-                    disabled={updating === route.id}
-                    className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full shrink-0 transition-colors ${
-                      route.status === "active"
-                        ? "bg-[#EFCC01]/25 hover:bg-[#EFCC01]/40 text-[#2D1E2F] border border-[#EFCC01]/50 cursor-pointer"
-                        : "bg-[#2D1E2F]/8 hover:bg-[#2D1E2F]/15 text-[#2D1E2F]/60 border border-transparent cursor-pointer"
-                    } ${updating === route.id ? "opacity-50 pointer-events-none" : ""}`}
-                    title={route.status === "active" ? "Haz clic para desactivar" : "Haz clic para activar"}
-                  >
-                    {updating === route.id ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Circle className="w-1.5 h-1.5 fill-current" />
-                    )}
-                    {route.status === "active" ? "Activa" : "Inactiva"}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleToggleStatus(route.id, route.status)}
+                      disabled={updating === route.id}
+                      className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full shrink-0 transition-colors ${
+                        route.status === "active"
+                          ? "bg-[#EFCC01]/25 hover:bg-[#EFCC01]/40 text-[#2D1E2F] border border-[#EFCC01]/50 cursor-pointer"
+                          : "bg-[#2D1E2F]/8 hover:bg-[#2D1E2F]/15 text-[#2D1E2F]/60 border border-transparent cursor-pointer"
+                      } ${updating === route.id ? "opacity-50 pointer-events-none" : ""}`}
+                      title={route.status === "active" ? "Haz clic para desactivar" : "Haz clic para activar"}
+                    >
+                      {updating === route.id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Circle className="w-1.5 h-1.5 fill-current" />
+                      )}
+                      {route.status === "active" ? "Activa" : "Inactiva"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setRouteToDelete(route);
+                        setShowDeleteModal(true);
+                      }}
+                      className="p-1.5 text-red-500 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors cursor-pointer"
+                      title="Eliminar ruta"
+                      type="button"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -248,6 +287,16 @@ export default function RoutesPage() {
       <div className="text-[#2D1E2F]/35 text-xs">
         Mostrando {filtered.length} de {routes.length} rutas
       </div>
+
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setRouteToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        loading={deleting}
+      />
     </div>
   );
 }

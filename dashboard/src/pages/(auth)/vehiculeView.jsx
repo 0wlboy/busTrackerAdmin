@@ -26,6 +26,7 @@ export default function VehicleView() {
     nextPage,
     prevPage,
     cedulas = {},
+    driversDetails = {},
   } = usePaginatedVehicles({
     pageSize: 10,
     orderByField: "createdAt",
@@ -36,21 +37,36 @@ export default function VehicleView() {
   const filtered = vehicles.filter((v) => {
     if (v.isDeleted === true) return false;
 
-    const route = v.routeId || v.route || "Sin ruta";
-    const driverId = v.driverId || "Sin conductor";
-    const cedula = cedulas[v.driverId] || "";
+    const searchTerm = search.toLowerCase().trim();
+    const route = String(v.routeName || v.routeId || v.route || "").toLowerCase();
+    const driverId = String(v.driverId || "").toLowerCase();
+    const driverInfo = v.driverId ? driversDetails[v.driverId] : null;
+    const driverName = String(driverInfo?.name || "").toLowerCase();
+    const driverCedula = String(driverInfo?.cedula || cedulas[v.driverId] || "").toLowerCase();
+    const plate = String(v.plate || "").toLowerCase();
 
     const matchSearch =
-      route.toLowerCase().includes(search.toLowerCase()) ||
-      driverId.toLowerCase().includes(search.toLowerCase()) ||
-      cedula.toLowerCase().includes(search.toLowerCase());
+      !searchTerm ||
+      route.includes(searchTerm) ||
+      driverId.includes(searchTerm) ||
+      driverName.includes(searchTerm) ||
+      driverCedula.includes(searchTerm) ||
+      plate.includes(searchTerm);
 
     return matchSearch;
   });
 
   const exportColumns = [
     { header: "ID", getValue: (v) => v.id || "Sin ID" },
-    { header: "Ruta", getValue: (v) => v.routeId || "Sin ruta" },
+    {
+      header: "Conductor",
+      getValue: (v) =>
+        v.driverId && driversDetails[v.driverId]
+          ? `${driversDetails[v.driverId].name} (${driversDetails[v.driverId].cedula})`
+          : "No asignado",
+    },
+    { header: "Ruta", getValue: (v) => v.routeName || v.routeId || "Sin ruta" },
+    { header: "Placa", getValue: (v) => v.plate || "N/A" },
     { header: "Asientos", getValue: (v) => v.seats || "Sin asientos" },
     { header: "Cédula", getValue: (v) => cedulas[v.driverId] || "Sin cédula" },
     {
@@ -111,7 +127,7 @@ export default function VehicleView() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#2D1E2F]/30" />
             <input
               type="text"
-              placeholder="Buscar por ruta o ID del conductor en esta página..."
+              placeholder="Buscar por placa, ruta o cédula..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 text-[#2D1E2F] placeholder-[#2D1E2F]/30 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#EFCC01] focus:ring-2 focus:ring-[#EFCC01]/20 transition-all"
@@ -144,6 +160,9 @@ export default function VehicleView() {
                   Vehículo
                 </th>
                 <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
+                  Conductor
+                </th>
+                <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
                   Ruta
                 </th>
                 <th className="text-left text-[#2D1E2F]/40 text-xs px-5 py-3.5 uppercase tracking-wider">
@@ -164,7 +183,7 @@ export default function VehicleView() {
               {!loading && filtered.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="text-center text-[#2D1E2F]/40 py-12 text-sm"
                   >
                     No se encontraron vehículos en esta página
@@ -174,6 +193,7 @@ export default function VehicleView() {
                 filtered.map((v) => {
                   const route = v.routeName || "Sin ruta";
                   const seats = v.seats || "N/A";
+                  const driverInfo = v.driverId ? driversDetails[v.driverId] : null;
 
                   return (
                     <tr
@@ -194,6 +214,31 @@ export default function VehicleView() {
                             </div>
                           )}
                         </div>
+                      </td>
+                      <td className="px-5 py-4">
+                        {driverInfo ? (
+                          <div>
+                            <p className="text-[#2D1E2F] text-sm font-medium">
+                              {driverInfo.name}
+                            </p>
+                            <p className="text-[#2D1E2F]/40 text-xs font-mono">
+                              C.I. {driverInfo.cedula}
+                            </p>
+                          </div>
+                        ) : v.driverId ? (
+                          <div>
+                            <p className="text-[#2D1E2F]/60 text-sm font-medium">
+                              Conductor
+                            </p>
+                            <p className="text-[#2D1E2F]/40 text-xs font-mono">
+                              C.I. {cedulas[v.driverId] || "Cargando..."}
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="text-xs italic text-[#2D1E2F]/40 bg-[#2D1E2F]/5 px-2.5 py-1 rounded-full">
+                            No asignado
+                          </span>
+                        )}
                       </td>
                       <td className="px-5 py-4">
                         <span className="text-[#2D1E2F] text-sm font-medium">
