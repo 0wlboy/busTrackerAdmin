@@ -20,14 +20,12 @@ const CONNECTIONS = [
   { label: "Conectado", value: true },
   { label: "Desconectado", value: false },
 ];
-const STATUSES = ["Todos", "Activo", "Inactivo"];
 
-export default function DriverView() {
+export default function PassengerView() {
   // const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [filterOnline, setFilterOnline] = useState(null);
-  const [filterStatus, setFilterStatus] = useState("Todos");
   const [showFilters, setShowFilters] = useState(false);
 
   const {
@@ -48,7 +46,7 @@ export default function DriverView() {
     isOnline: filterOnline,
   });
 
-  // Filtramos en el cliente (búsqueda de texto y estado) sobre los resultados de la página actual
+  // Filtramos en el cliente (búsqueda de texto) sobre los resultados de la página actual
   const filtered = users.filter((u) => {
     if (u.isDeleted === true) return false;
 
@@ -66,12 +64,7 @@ export default function DriverView() {
       userCedula.includes(searchTerm) ||
       userPhone.includes(searchTerm);
 
-    // Filtro por estado local
-    const matchStatus =
-      filterStatus === "Todos" ||
-      (filterStatus === "Activo" ? u.isOnline === true : u.isOnline === false);
-
-    return matchSearch && matchStatus;
+    return matchSearch;
   });
 
   const exportColumns = [
@@ -137,7 +130,7 @@ export default function DriverView() {
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm transition-colors ${
-              showFilters || filterOnline !== null || filterStatus !== "Todos"
+              showFilters || filterOnline !== null
                 ? "bg-[#EFCC01]/20 border-[#EFCC01]/50 text-[#2D1E2F]"
                 : "bg-[#FFF9D6] border-[#2D1E2F]/15 text-[#2D1E2F]/60 hover:text-[#2D1E2F]"
             }`}
@@ -151,10 +144,10 @@ export default function DriverView() {
         </div>
 
         {showFilters && (
-          <div className="flex flex-wrap gap-3 pt-3 border-t border-[#2D1E2F]/10">
+          <div className="flex flex-wrap gap-3 items-end pt-3 border-t border-[#2D1E2F]/10">
             <div>
               <label className="text-[#2D1E2F]/40 text-xs mb-1.5 block">
-                Conexión (Filtrado en servidor)
+                Conexión
               </label>
               <div className="flex gap-2 flex-wrap">
                 {CONNECTIONS.map((c) => (
@@ -172,33 +165,12 @@ export default function DriverView() {
                 ))}
               </div>
             </div>
-            <div>
-              <label className="text-[#2D1E2F]/40 text-xs mb-1.5 block">
-                Estado (Filtrado local)
-              </label>
-              <div className="flex gap-2">
-                {STATUSES.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setFilterStatus(s)}
-                    className={`px-3 py-1.5 rounded-lg text-xs transition-colors ${
-                      filterStatus === s
-                        ? "bg-[#2D1E2F] text-white"
-                        : "bg-[#FFF9D6] text-[#2D1E2F]/60 hover:text-[#2D1E2F] border border-[#2D1E2F]/15"
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {(filterOnline !== null || filterStatus !== "Todos") && (
+            {filterOnline !== null && (
               <button
                 onClick={() => {
                   setFilterOnline(null);
-                  setFilterStatus("Todos");
                 }}
-                className="self-end text-xs text-red-500 hover:text-red-600 px-2 py-1.5"
+                className="text-xs text-red-500 hover:text-red-600 px-2 py-1.5"
               >
                 Limpiar filtros
               </button>
