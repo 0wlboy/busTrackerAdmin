@@ -1,7 +1,13 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { Mail, ArrowLeft, AlertCircle, CheckCircle2, SendHorizonal } from "lucide-react";
+import {
+  Mail,
+  ArrowLeft,
+  AlertCircle,
+  CheckCircle2,
+  SendHorizonal,
+} from "lucide-react";
 
 export default function PasswordRecovery() {
   const { resetPassword } = useAuth();
@@ -10,33 +16,44 @@ export default function PasswordRecovery() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!email.trim()) {
-      setError("El correo electrónico es requerido. Por favor, escribe tu dirección de correo electrónico para poder enviarte el enlace de recuperación.");
+    const cleanEmail = email.replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+$/;
+
+    if (!cleanEmail) {
+      setError(
+        "El correo electrónico es requerido. Por favor, escribe tu dirección de correo electrónico para poder enviarte el enlace de recuperación.",
+      );
       return;
     }
 
-    if (!emailRegex.test(email.trim())) {
-      setError("El formato del correo electrónico no es válido. Asegúrate de incluir una dirección correcta que contenga '@' y un dominio (ej. usuario@empresa.com).");
+    if (!emailRegex.test(cleanEmail)) {
+      setError(
+        "El formato del correo electrónico no es válido. Asegúrate de incluir una dirección correcta que contenga '@' y un dominio (ej. usuario@empresa.com).",
+      );
       return;
     }
 
     setLoading(true);
     try {
-      await resetPassword(email.trim());
+      await resetPassword(cleanEmail);
       setSent(true);
     } catch (err) {
       if (err.code === "auth/user-not-found") {
-        setError("No existe ninguna cuenta asociada a este correo electrónico. Por favor, verifica si lo escribiste correctamente o ponte en contacto con soporte.");
+        setError(
+          "No existe ninguna cuenta asociada a este correo electrónico. Por favor, verifica si lo escribiste correctamente o ponte en contacto con soporte.",
+        );
       } else if (err.code === "auth/too-many-requests") {
-        setError("Se han realizado demasiados intentos de recuperación de contraseña seguidos. Para solucionarlo, espera unos minutos antes de intentar de nuevo.");
+        setError(
+          "Se han realizado demasiados intentos de recuperación de contraseña seguidos. Para solucionarlo, espera unos minutos antes de intentar de nuevo.",
+        );
       } else {
-        setError("Ocurrió un error inesperado al intentar enviar el correo de recuperación. Por favor, intenta de nuevo más tarde.");
+        setError(
+          "Ocurrió un error inesperado al intentar enviar el correo de recuperación. Por favor, intenta de nuevo más tarde.",
+        );
       }
     } finally {
       setLoading(false);
@@ -81,7 +98,6 @@ export default function PasswordRecovery() {
 
         {/* Card */}
         <div className="bg-[#FFF3AD] rounded-2xl p-8 shadow-2xl shadow-black/30">
-
           {sent ? (
             /* ── Estado de éxito ── */
             <div className="flex flex-col items-center text-center gap-4 py-4">
@@ -115,7 +131,9 @@ export default function PasswordRecovery() {
                   <Mail className="w-5 h-5 text-[#2D1E2F]/60" />
                 </div>
                 <div>
-                  <h2 className="text-[#2D1E2F] text-xl">Recuperar contraseña</h2>
+                  <h2 className="text-[#2D1E2F] text-xl">
+                    Recuperar contraseña
+                  </h2>
                   <p className="text-[#2D1E2F]/50 text-sm">
                     Te enviaremos un enlace a tu correo
                   </p>
@@ -131,7 +149,7 @@ export default function PasswordRecovery() {
                     id="recovery-email"
                     type="email"
                     value={email}
-                    maxLength={50}
+                    maxLength={100}
                     onChange={(e) => {
                       setEmail(e.target.value);
                       if (error) setError("");
@@ -144,7 +162,9 @@ export default function PasswordRecovery() {
                     <div className="flex gap-2 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-xs mt-1.5 animate-fadeIn">
                       <AlertCircle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
                       <div>
-                        <span className="font-semibold block">Alerta en correo electrónico</span>
+                        <span className="font-semibold block">
+                          Alerta en correo electrónico
+                        </span>
                         <span>{error}</span>
                       </div>
                     </div>
@@ -158,7 +178,11 @@ export default function PasswordRecovery() {
                   className="w-full bg-[#EFCC01] hover:bg-[#EFCC01]/90 disabled:opacity-60 disabled:cursor-not-allowed text-[#2D1E2F] rounded-xl px-4 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-md shadow-[#EFCC01]/20"
                 >
                   {loading ? (
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <svg
+                      className="w-4 h-4 animate-spin"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
                       <circle
                         className="opacity-25"
                         cx="12"

@@ -26,17 +26,21 @@ export default function Login() {
     setSubmitError("");
 
     const newErrors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{12,30}$/;
+    // Limpia espacios normales y caracteres invisibles (zero-width spaces/BOM) comunes al copiar/pegar
+    const cleanEmail = email.replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
 
-    if (!email.trim()) {
+    // Regex permisiva: requiere caracteres antes del @, un @ y caracteres después sin espacios
+    const emailRegex = /^[^\s@]+@[^\s@]+$/;
+
+    if (!cleanEmail) {
       newErrors.email =
         "El correo electrónico es requerido. Por favor, escribe tu dirección de correo electrónico.";
-    } else if (email.trim().length > 30) {
-      newErrors.email =
-        "El correo electrónico no puede tener más de 30 caracteres.";
-    } else if (!emailRegex.test(email.trim())) {
+      return;
+    }
+    if (!emailRegex.test(cleanEmail)) {
       newErrors.email =
         "El formato del correo electrónico no es válido. Asegúrate de incluir el símbolo '@' y un dominio válido (ej. usuario@empresa.com).";
+      return;
     }
 
     if (!password) {
@@ -56,7 +60,7 @@ export default function Login() {
 
     setLoading(true);
     try {
-      await login(email.trim(), password);
+      await login(cleanEmail, password);
       // El login fue exitoso, no necesitamos quitar el loading porque nos vamos de la página
       navigate("/home", { replace: true });
     } catch (err) {
@@ -64,7 +68,13 @@ export default function Login() {
       const code = err.code || "";
       const msg = err.message || "";
 
-      if (
+      if (code === "auth/invalid-email" || msg.includes("invalid-email")) {
+        setErrors((prev) => ({
+          ...prev,
+          email:
+            "El formato del correo electrónico no es reconocido por el servicio de autenticación.",
+        }));
+      } else if (
         code === "auth/user-not-found" ||
         code === "auth/invalid-credential" ||
         msg.includes("no existe") ||
@@ -73,7 +83,7 @@ export default function Login() {
         setErrors((prev) => ({
           ...prev,
           email:
-            "No se encontró ningún usuario con este correo electrónico. Por favor, verifica la dirección ingresada o regístrate.",
+            "No se encontró ningún usuario con este correo electrónico o la credencial no es válida. Por favor, verifica la dirección ingresada o regístrate.",
         }));
       } else if (
         code === "auth/wrong-password" ||
@@ -149,7 +159,7 @@ export default function Login() {
               <input
                 type="email"
                 value={email}
-                maxLength={30}
+                maxLength={100}
                 onChange={(e) => {
                   setEmail(e.target.value);
                   setErrors((prev) => ({ ...prev, email: "" }));

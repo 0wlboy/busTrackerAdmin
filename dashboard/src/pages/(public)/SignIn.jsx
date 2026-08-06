@@ -31,7 +31,7 @@ export default function SignIn() {
   const validate = () => {
     const e = {};
     const userNameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{3,50}$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+$/;
     const cedulaRegex = /^\d+$/;
     const phoneRegex = /^\+?[0-9\s\-]{7,15}$/;
     const passwordRegex = /^.{6,20}$/;
@@ -44,10 +44,12 @@ export default function SignIn() {
         "El nombre de usuario debe contener únicamente letras y espacios, y tener una longitud de entre 3 y 50 caracteres.";
     }
 
-    if (!form.email.trim()) {
+    const cleanEmail = form.email.replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+
+    if (!cleanEmail) {
       e.email =
         "El correo electrónico es requerido. Asegúrate de ingresar tu correo corporativo o personal.";
-    } else if (!emailRegex.test(form.email.trim())) {
+    } else if (!emailRegex.test(cleanEmail)) {
       e.email =
         "El formato de correo electrónico no es válido. Asegúrate de incluir el carácter '@' seguido de un dominio (ej. admin@empresa.com).";
     }
@@ -101,7 +103,7 @@ export default function SignIn() {
     try {
       await register({
         userName: form.userName.trim(),
-        email: form.email.trim(),
+        email: form.email.replace(/[\u200B-\u200D\uFEFF]/g, "").trim(),
         password: form.password,
         cedula: form.cedula.trim(),
         phone: form.phone.trim(),
@@ -254,7 +256,7 @@ export default function SignIn() {
                     id="signin-email"
                     type="email"
                     value={form.email}
-                    maxLength={50}
+                    maxLength={100}
                     onChange={(e) => set("email", e.target.value)}
                     placeholder="admin@empresa.com"
                     autoComplete="email"
