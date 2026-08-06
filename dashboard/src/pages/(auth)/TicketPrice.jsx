@@ -137,7 +137,8 @@ export default function TicketPrice() {
   const exportColumns = [
     {
       header: "Fecha",
-      getValue: (item) => `${formatDate(item.createdAt)} ${formatTime(item.createdAt)}`,
+      getValue: (item) =>
+        `${formatDate(item.createdAt)} ${formatTime(item.createdAt)}`,
     },
     {
       header: "Precio Anterior",
@@ -155,7 +156,8 @@ export default function TicketPrice() {
     },
     {
       header: "Variación",
-      getValue: (item) => calculateChange(item.actualPrice, item.prevPrice).text,
+      getValue: (item) =>
+        calculateChange(item.actualPrice, item.prevPrice).text,
     },
   ];
 
@@ -273,12 +275,20 @@ export default function TicketPrice() {
                     Bs
                   </span>
                   <Input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
+                    type="text"
+                    inputMode="decimal"
+                    maxLength={10}
                     placeholder="0.00"
                     value={newPrice}
-                    onChange={(e) => setNewPrice(e.target.value)}
+                    onChange={(e) => {
+                      let val = e.target.value.replace(",", ".");
+                      val = val.replace(/[^0-9.]/g, "");
+                      const parts = val.split(".");
+                      if (parts.length > 2) {
+                        val = parts[0] + "." + parts.slice(1).join("");
+                      }
+                      setNewPrice(val);
+                    }}
                     disabled={loading || saving}
                     required
                     className="pl-8 bg-[#FFF9D6] border-[#2D1E2F]/15 focus-visible:ring-[#EFCC01]/30 focus-visible:border-[#EFCC01] text-[#2D1E2F] font-semibold h-11"

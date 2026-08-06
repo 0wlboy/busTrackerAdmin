@@ -131,6 +131,7 @@ export default function PasswordRecovery() {
                     id="recovery-email"
                     type="email"
                     value={email}
+                    maxLength={50}
                     onChange={(e) => {
                       setEmail(e.target.value);
                       if (error) setError("");

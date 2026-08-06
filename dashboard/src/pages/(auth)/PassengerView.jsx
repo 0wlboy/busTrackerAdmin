@@ -123,6 +123,7 @@ export default function PassengerView() {
               type="text"
               placeholder="Buscar por nombre, cédula, teléfono o correo..."
               value={search}
+              maxLength={50}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 text-[#2D1E2F] placeholder-[#2D1E2F]/30 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#EFCC01] focus:ring-2 focus:ring-[#EFCC01]/20 transition-all"
             />

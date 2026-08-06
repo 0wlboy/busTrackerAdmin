@@ -34,7 +34,7 @@ export default function AddUser() {
     // Expresiones regulares de validación
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{3,50}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const cedulaRegex = /^\d+$/;
+    const cedulaRegex = /^\+?[0-9\s\-]{7,12}$/;
     const passwordRegex = /^.{6,20}$/;
     const phoneRegex = /^\+?[0-9\s\-]{7,15}$/;
 
@@ -65,10 +65,13 @@ export default function AddUser() {
         "La cédula debe contener únicamente números. Remueve cualquier letra, espacio, guion o punto.";
     }
 
-    // Teléfono (opcional)
-    if (form.phone.trim() && !phoneRegex.test(form.phone.trim())) {
+    // Teléfono
+    if (!form.phone.trim()) {
       e.phone =
-        "El número telefónico no es válido. Asegúrate de ingresar entre 7 y 15 dígitos numéricos (ej. +584120000000).";
+        "El número telefónico es requerido. Por favor, ingresa tu número de teléfono.";
+    } else if (!phoneRegex.test(form.phone.trim())) {
+      e.phone =
+        "El número telefónico debe contener únicamente números y tener entre 7 y 15 dígitos.";
     }
 
     // Contraseña
@@ -218,11 +221,12 @@ export default function AddUser() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div className="sm:col-span-2">
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              Nombre completo *
+              Nombre completo <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={form.name}
+              maxLength={50}
               onChange={(e) => set("name", e.target.value)}
               placeholder="Ej. Juan Pérez"
               className={inputClass(!!errors.name)}
@@ -242,11 +246,12 @@ export default function AddUser() {
 
           <div className="sm:col-span-2">
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              Correo electrónico *
+              Correo electrónico <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
               value={form.email}
+              maxLength={50}
               onChange={(e) => set("email", e.target.value)}
               placeholder="usuario@empresa.com"
               className={inputClass(!!errors.email)}
@@ -266,11 +271,12 @@ export default function AddUser() {
 
           <div className="sm:col-span-2">
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              Cédula *
+              Cédula <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={form.cedula}
+              maxLength={12}
               onChange={(e) => set("cedula", e.target.value.replace(/\D/g, ""))}
               placeholder="Ej. 12345678"
               className={inputClass(!!errors.cedula)}
@@ -288,13 +294,14 @@ export default function AddUser() {
 
           <div>
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              Teléfono
+              Teléfono <span className="text-red-500">*</span>
             </label>
             <input
-              type="tel"
+              type="text"
               value={form.phone}
-              onChange={(e) => set("phone", e.target.value)}
-              placeholder="+1 234 567 8900"
+              maxLength={15}
+              onChange={(e) => set("phone", e.target.value.replace(/\D/g, ""))}
+              placeholder="04120000000"
               className={inputClass(!!errors.phone)}
             />
             {errors.phone && (
@@ -311,26 +318,29 @@ export default function AddUser() {
           </div>
 
           <div>
-            <label className="block text-[#2D1E2F] text-sm mb-1.5">Rol *</label>
+            <label className="block text-[#2D1E2F] text-sm mb-1.5">
+              Rol <span className="text-red-500">*</span>
+            </label>
             <select
               value={form.role}
               onChange={(e) => set("role", e.target.value)}
               className={selectClass}
             >
-              <option value="Operador">Conductor</option>
-              <option value="Supervisor">Pasajero</option>
-              <option value="Administrador">Administrador</option>
+              <option value="conductor">Conductor</option>
+              <option value="pasajero">Pasajero</option>
+              <option value="admin">Administrador</option>
             </select>
           </div>
 
           <div className="relative">
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              Contraseña *
+              Contraseña <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 value={form.password}
+                maxLength={20}
                 onChange={(e) => set("password", e.target.value)}
                 placeholder="Mínimo 6 caracteres"
                 className={inputClass(!!errors.password) + " pr-12"}
@@ -362,11 +372,12 @@ export default function AddUser() {
 
           <div>
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              Confirmar contraseña *
+              Confirmar contraseña <span className="text-red-500">*</span>
             </label>
             <input
               type="password"
               value={form.confirmPassword}
+              maxLength={20}
               onChange={(e) => set("confirmPassword", e.target.value)}
               placeholder="Repite la contraseña"
               className={inputClass(!!errors.confirmPassword)}

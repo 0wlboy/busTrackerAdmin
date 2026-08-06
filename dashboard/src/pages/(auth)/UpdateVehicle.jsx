@@ -377,6 +377,7 @@ export default function UpdateVehicle() {
             <input
               type="text"
               value={form.plate}
+              maxLength={15}
               onChange={(e) => setField("plate", e.target.value)}
               placeholder="Escribe la placa del vehiculo..."
               className={inputClass(!!errors.plate)}
@@ -405,9 +406,16 @@ export default function UpdateVehicle() {
             <input
               type="number"
               value={form.seats}
+              maxLength={3}
+              onInput={(e) => {
+                if (e.target.value.length > 3) {
+                  e.target.value = e.target.value.slice(0, 3);
+                }
+              }}
               onChange={(e) => setField("seats", e.target.value)}
               placeholder="Ej. 24"
               min="1"
+              max="999"
               className={inputClass(!!errors.seats)}
             />
             {errors.seats && (

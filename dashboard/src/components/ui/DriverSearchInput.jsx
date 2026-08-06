@@ -74,6 +74,7 @@ export default function DriverSearchInput({
             className="flex-1 bg-transparent outline-none text-[#2D1E2F] placeholder-[#2D1E2F]/30"
             placeholder="Buscar por nombre o cédula..."
             value={query}
+            maxLength={50}
             onChange={(e) => setQuery(e.target.value)}
             onClick={(e) => e.stopPropagation()}
           />

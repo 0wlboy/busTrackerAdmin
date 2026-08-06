@@ -26,11 +26,14 @@ export default function Login() {
     setSubmitError("");
 
     const newErrors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{12,30}$/;
 
     if (!email.trim()) {
       newErrors.email =
         "El correo electrónico es requerido. Por favor, escribe tu dirección de correo electrónico.";
+    } else if (email.trim().length > 30) {
+      newErrors.email =
+        "El correo electrónico no puede tener más de 30 caracteres.";
     } else if (!emailRegex.test(email.trim())) {
       newErrors.email =
         "El formato del correo electrónico no es válido. Asegúrate de incluir el símbolo '@' y un dominio válido (ej. usuario@empresa.com).";
@@ -42,6 +45,8 @@ export default function Login() {
     } else if (password.length < 6) {
       newErrors.password =
         "La contraseña debe tener al menos 6 caracteres. Si olvidaste tu contraseña, usa el enlace de recuperación.";
+    } else if (password.length > 20) {
+      newErrors.password = "La contraseña no puede tener más de 20 caracteres.";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -144,6 +149,7 @@ export default function Login() {
               <input
                 type="email"
                 value={email}
+                maxLength={30}
                 onChange={(e) => {
                   setEmail(e.target.value);
                   setErrors((prev) => ({ ...prev, email: "" }));
@@ -177,6 +183,7 @@ export default function Login() {
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
+                  maxLength={20}
                   onChange={(e) => {
                     setPassword(e.target.value);
                     setErrors((prev) => ({ ...prev, password: "" }));

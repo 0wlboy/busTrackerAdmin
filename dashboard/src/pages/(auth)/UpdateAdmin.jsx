@@ -74,9 +74,11 @@ export default function UpdateAdmin() {
         "La cédula debe contener únicamente números. Remueve cualquier letra, espacio o guión.";
     }
 
-    // Teléfono (opcional)
+    // Teléfono
     const telefonoStr = String(form.telefono ?? "");
-    if (telefonoStr.trim() && !phoneRegex.test(telefonoStr.trim())) {
+    if (!telefonoStr.trim()) {
+      e.telefono = "El número telefónico es requerido.";
+    } else if (!phoneRegex.test(telefonoStr.trim())) {
       e.telefono =
         "El número telefónico no es válido. Ingresa entre 7 y 15 dígitos (ej. +584120000000).";
     }
@@ -201,11 +203,12 @@ export default function UpdateAdmin() {
           {/* Nombre */}
           <div>
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              Nombre completo
+              Nombre completo <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={form.name}
+              maxLength={50}
               onChange={(e) => set("name", e.target.value)}
               placeholder="Ej. Juan Pérez"
               className={inputClass(!!errors.name)}
@@ -226,11 +229,12 @@ export default function UpdateAdmin() {
           {/* Cédula */}
           <div>
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              Cédula
+              Cédula <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={form.cedula}
+              maxLength={12}
               onChange={(e) => set("cedula", e.target.value.replace(/\D/g, ""))}
               placeholder="Ej. 12345678"
               className={inputClass(!!errors.cedula)}
@@ -249,13 +253,16 @@ export default function UpdateAdmin() {
           {/* Teléfono */}
           <div>
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              Teléfono
+              Teléfono <span className="text-red-500">*</span>
             </label>
             <input
               type="tel"
               value={form.telefono}
-              onChange={(e) => set("telefono", e.target.value)}
-              placeholder="+1 234 567 8900"
+              maxLength={15}
+              onChange={(e) =>
+                set("telefono", e.target.value.replace(/\D/g, ""))
+              }
+              placeholder="Ej. 04123456789"
               className={inputClass(!!errors.telefono)}
             />
             {errors.telefono && (

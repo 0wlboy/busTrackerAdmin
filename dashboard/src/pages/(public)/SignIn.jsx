@@ -37,37 +37,51 @@ export default function SignIn() {
     const passwordRegex = /^.{6,20}$/;
 
     if (!form.userName.trim()) {
-      e.userName = "El nombre de usuario es requerido. Para solucionarlo, ingresa tu nombre completo usando solo letras y espacios.";
+      e.userName =
+        "El nombre de usuario es requerido. Para solucionarlo, ingresa tu nombre completo usando solo letras y espacios.";
     } else if (!userNameRegex.test(form.userName.trim())) {
-      e.userName = "El nombre de usuario debe contener únicamente letras y espacios, y tener una longitud de entre 3 y 50 caracteres.";
+      e.userName =
+        "El nombre de usuario debe contener únicamente letras y espacios, y tener una longitud de entre 3 y 50 caracteres.";
     }
 
     if (!form.email.trim()) {
-      e.email = "El correo electrónico es requerido. Asegúrate de ingresar tu correo corporativo o personal.";
+      e.email =
+        "El correo electrónico es requerido. Asegúrate de ingresar tu correo corporativo o personal.";
     } else if (!emailRegex.test(form.email.trim())) {
-      e.email = "El formato de correo electrónico no es válido. Asegúrate de incluir el carácter '@' seguido de un dominio (ej. admin@empresa.com).";
+      e.email =
+        "El formato de correo electrónico no es válido. Asegúrate de incluir el carácter '@' seguido de un dominio (ej. admin@empresa.com).";
     }
 
     if (!form.cedula.trim()) {
-      e.cedula = "La cédula es requerida. Ingresa tu número de identificación nacional.";
+      e.cedula =
+        "La cédula es requerida. Ingresa tu número de identificación nacional.";
     } else if (!cedulaRegex.test(form.cedula.trim())) {
-      e.cedula = "La cédula debe contener únicamente dígitos numéricos. Elimina cualquier letra, punto, espacio o guion.";
+      e.cedula =
+        "La cédula debe contener únicamente dígitos numéricos. Elimina cualquier letra, punto, espacio o guion.";
     }
 
-    if (form.phone.trim() && !phoneRegex.test(form.phone.trim())) {
-      e.phone = "El número telefónico no es válido. Debe tener entre 7 y 15 dígitos y puede comenzar con el símbolo '+' (ej. +584120000000).";
+    if (!form.phone.trim()) {
+      e.phone =
+        "El número telefónico es requerido. Ingresa tu número de teléfono.";
+    } else if (!phoneRegex.test(form.phone.trim())) {
+      e.phone =
+        "El número telefónico no es válido. Debe tener entre 7 y 15 dígitos y puede comenzar con el símbolo '+' (ej. +584120000000).";
     }
 
     if (!form.password) {
-      e.password = "La contraseña es requerida. Ingresa una clave segura para proteger tu cuenta.";
+      e.password =
+        "La contraseña es requerida. Ingresa una clave segura para proteger tu cuenta.";
     } else if (!passwordRegex.test(form.password)) {
-      e.password = "La contraseña debe tener una longitud de entre 6 y 20 caracteres.";
+      e.password =
+        "La contraseña debe tener una longitud de entre 6 y 20 caracteres.";
     }
 
     if (!form.confirmPassword) {
-      e.confirmPassword = "Es necesario confirmar la contraseña. Por favor, vuelve a escribir la clave.";
+      e.confirmPassword =
+        "Es necesario confirmar la contraseña. Por favor, vuelve a escribir la clave.";
     } else if (form.password !== form.confirmPassword) {
-      e.confirmPassword = "Las contraseñas no coinciden. Asegúrate de escribir exactamente los mismos caracteres en ambos campos.";
+      e.confirmPassword =
+        "Las contraseñas no coinciden. Asegúrate de escribir exactamente los mismos caracteres en ambos campos.";
     }
 
     return e;
@@ -98,20 +112,25 @@ export default function SignIn() {
       if (err.code === "auth/email-already-in-use") {
         setErrors((prev) => ({
           ...prev,
-          email: "Este correo electrónico ya está registrado en el sistema. Para solucionarlo, usa un correo electrónico diferente o recupera la contraseña si la has olvidado.",
+          email:
+            "Este correo electrónico ya está registrado en el sistema. Para solucionarlo, usa un correo electrónico diferente o recupera la contraseña si la has olvidado.",
         }));
       } else if (err.code === "auth/weak-password") {
         setErrors((prev) => ({
           ...prev,
-          password: "La contraseña ingresada es muy débil. Intenta usar una combinación de letras, números y caracteres especiales (mínimo 6 caracteres).",
+          password:
+            "La contraseña ingresada es muy débil. Intenta usar una combinación de letras, números y caracteres especiales (mínimo 6 caracteres).",
         }));
       } else if (err.code === "auth/invalid-email") {
         setErrors((prev) => ({
           ...prev,
-          email: "El formato del correo es inválido. Verifica que no tenga espacios adicionales y que incluya un dominio correcto.",
+          email:
+            "El formato del correo es inválido. Verifica que no tenga espacios adicionales y que incluya un dominio correcto.",
         }));
       } else {
-        setSubmitError("Ocurrió un error inesperado al registrar la cuenta. Inténtalo de nuevo más tarde.");
+        setSubmitError(
+          "Ocurrió un error inesperado al registrar la cuenta. Inténtalo de nuevo más tarde.",
+        );
       }
     } finally {
       setLoading(false);
@@ -145,8 +164,16 @@ export default function SignIn() {
               stroke="currentColor"
               strokeWidth={2}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2 2h10zM13 6l3 5h3l1 2v3h-1m-3-10v10" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2 2h10zM13 6l3 5h3l1 2v3h-1m-3-10v10"
+              />
             </svg>
           </div>
           <h1 className="text-white text-3xl mb-1">FleetControl</h1>
@@ -155,7 +182,6 @@ export default function SignIn() {
 
         {/* Card */}
         <div className="bg-[#FFF3AD] rounded-2xl p-8 shadow-2xl shadow-black/30">
-
           {success ? (
             /* ── Estado de éxito ── */
             <div className="flex flex-col items-center text-center gap-4 py-4">
@@ -165,8 +191,12 @@ export default function SignIn() {
               <div>
                 <h2 className="text-[#2D1E2F] text-xl mb-1">¡Cuenta creada!</h2>
                 <p className="text-[#2D1E2F]/60 text-sm">
-                  El administrador <span className="font-semibold text-[#2D1E2F]">{form.userName}</span> ha sido registrado correctamente.
-                  Redirigiendo al inicio de sesión…
+                  El administrador{" "}
+                  <span className="font-semibold text-[#2D1E2F]">
+                    {form.userName}
+                  </span>{" "}
+                  ha sido registrado correctamente. Redirigiendo al inicio de
+                  sesión…
                 </p>
               </div>
             </div>
@@ -180,22 +210,24 @@ export default function SignIn() {
                   <h2 className="text-[#2D1E2F] text-xl">Nueva cuenta</h2>
                   <p className="text-[#2D1E2F]/50 text-sm">
                     Rol asignado automáticamente:{" "}
-                    <span className="font-semibold text-[#2D1E2F]">Administrador</span>
+                    <span className="font-semibold text-[#2D1E2F]">
+                      Administrador
+                    </span>
                   </p>
                 </div>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-
                 {/* Nombre de usuario */}
                 <div>
                   <label className="block text-[#2D1E2F] text-sm mb-1.5">
-                    Nombre de usuario *
+                    Nombre de usuario <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="signin-username"
                     type="text"
                     value={form.userName}
+                    maxLength={50}
                     onChange={(e) => set("userName", e.target.value)}
                     placeholder="Ej. Juan Pérez"
                     className={inputClass(!!errors.userName)}
@@ -204,7 +236,9 @@ export default function SignIn() {
                     <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
                       <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                       <div>
-                        <span className="font-semibold block">Alerta en nombre de usuario</span>
+                        <span className="font-semibold block">
+                          Alerta en nombre de usuario
+                        </span>
                         <span>{errors.userName}</span>
                       </div>
                     </div>
@@ -214,12 +248,13 @@ export default function SignIn() {
                 {/* Email */}
                 <div>
                   <label className="block text-[#2D1E2F] text-sm mb-1.5">
-                    Correo electrónico *
+                    Correo electrónico <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="signin-email"
                     type="email"
                     value={form.email}
+                    maxLength={50}
                     onChange={(e) => set("email", e.target.value)}
                     placeholder="admin@empresa.com"
                     autoComplete="email"
@@ -229,7 +264,9 @@ export default function SignIn() {
                     <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
                       <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                       <div>
-                        <span className="font-semibold block">Alerta en correo electrónico</span>
+                        <span className="font-semibold block">
+                          Alerta en correo electrónico
+                        </span>
                         <span>{errors.email}</span>
                       </div>
                     </div>
@@ -240,13 +277,16 @@ export default function SignIn() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[#2D1E2F] text-sm mb-1.5">
-                      Cédula *
+                      Cédula <span className="text-red-500">*</span>
                     </label>
                     <input
                       id="signin-cedula"
                       type="text"
                       value={form.cedula}
-                      onChange={(e) => set("cedula", e.target.value.replace(/\D/g, ""))}
+                      maxLength={12}
+                      onChange={(e) =>
+                        set("cedula", e.target.value.replace(/\D/g, ""))
+                      }
                       placeholder="12345678"
                       className={inputClass(!!errors.cedula)}
                     />
@@ -254,7 +294,9 @@ export default function SignIn() {
                       <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
                         <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                         <div>
-                          <span className="font-semibold block">Alerta en cédula</span>
+                          <span className="font-semibold block">
+                            Alerta en cédula
+                          </span>
                           <span>{errors.cedula}</span>
                         </div>
                       </div>
@@ -263,21 +305,26 @@ export default function SignIn() {
 
                   <div>
                     <label className="block text-[#2D1E2F] text-sm mb-1.5">
-                      Teléfono
+                      Teléfono <span className="text-red-500">*</span>
                     </label>
                     <input
                       id="signin-phone"
-                      type="tel"
+                      type="text"
                       value={form.phone}
-                      onChange={(e) => set("phone", e.target.value)}
-                      placeholder="+1 234 567 8900"
+                      maxLength={15}
+                      onChange={(e) =>
+                        set("phone", e.target.value.replace(/\D/g, ""))
+                      }
+                      placeholder="04141234567"
                       className={inputClass(!!errors.phone)}
                     />
                     {errors.phone && (
                       <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
                         <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                         <div>
-                          <span className="font-semibold block">Alerta en teléfono</span>
+                          <span className="font-semibold block">
+                            Alerta en teléfono
+                          </span>
                           <span>{errors.phone}</span>
                         </div>
                       </div>
@@ -288,13 +335,14 @@ export default function SignIn() {
                 {/* Contraseña */}
                 <div>
                   <label className="block text-[#2D1E2F] text-sm mb-1.5">
-                    Contraseña *
+                    Contraseña <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
                       id="signin-password"
                       type={showPassword ? "text" : "password"}
                       value={form.password}
+                      maxLength={20}
                       onChange={(e) => set("password", e.target.value)}
                       placeholder="Mínimo 6 caracteres"
                       autoComplete="new-password"
@@ -305,14 +353,20 @@ export default function SignIn() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2D1E2F]/40 hover:text-[#2D1E2F] transition-colors"
                     >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                   {errors.password && (
                     <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
                       <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                       <div>
-                        <span className="font-semibold block">Alerta en contraseña</span>
+                        <span className="font-semibold block">
+                          Alerta en contraseña
+                        </span>
                         <span>{errors.password}</span>
                       </div>
                     </div>
@@ -322,31 +376,40 @@ export default function SignIn() {
                 {/* Confirmar Contraseña */}
                 <div>
                   <label className="block text-[#2D1E2F] text-sm mb-1.5">
-                    Confirmar contraseña *
+                    Confirmar contraseña <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
                       id="signin-confirm-password"
                       type={showConfirm ? "text" : "password"}
                       value={form.confirmPassword}
+                      maxLength={20}
                       onChange={(e) => set("confirmPassword", e.target.value)}
                       placeholder="Repite tu contraseña"
                       autoComplete="new-password"
-                      className={inputClass(!!errors.confirmPassword) + " pr-12"}
+                      className={
+                        inputClass(!!errors.confirmPassword) + " pr-12"
+                      }
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirm(!showConfirm)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-[#2D1E2F]/40 hover:text-[#2D1E2F] transition-colors"
                     >
-                      {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showConfirm ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                   {errors.confirmPassword && (
                     <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
                       <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                       <div>
-                        <span className="font-semibold block">Alerta en confirmación</span>
+                        <span className="font-semibold block">
+                          Alerta en confirmación
+                        </span>
                         <span>{errors.confirmPassword}</span>
                       </div>
                     </div>
@@ -369,9 +432,24 @@ export default function SignIn() {
                   className="w-full bg-[#EFCC01] hover:bg-[#EFCC01]/90 disabled:opacity-60 disabled:cursor-not-allowed text-[#2D1E2F] rounded-xl px-4 py-3 text-sm font-medium flex items-center justify-center gap-2 transition-colors shadow-md shadow-[#EFCC01]/20"
                 >
                   {loading ? (
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    <svg
+                      className="w-4 h-4 animate-spin"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
                     </svg>
                   ) : (
                     <UserPlus className="w-4 h-4" />

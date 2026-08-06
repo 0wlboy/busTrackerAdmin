@@ -212,7 +212,7 @@ export default function AddVehicule() {
           {/* Photo Upload */}
           <div className="sm:col-span-2">
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              Foto del vehículo *
+              Foto del vehículo <span className="text-red-500">*</span>
             </label>
             <div
               className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${
@@ -258,7 +258,7 @@ export default function AddVehicule() {
           {/* Driver Search */}
           <div className="sm:col-span-2">
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              Conductor *
+              Conductor <span className="text-red-500">*</span>
             </label>
             <DriverSearchInput
               value={form.driverId}
@@ -273,11 +273,12 @@ export default function AddVehicule() {
           {/* Plate */}
           <div className="sm:col-span-2">
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              Placa del Vehiculo *
+              Placa del Vehiculo <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={form.plate}
+              maxLength={15}
               onChange={(e) => setField("plate", e.target.value)}
               placeholder="Escribe la placa del vehiculo..."
               className={inputClass(!!errors.plate)}
@@ -301,14 +302,21 @@ export default function AddVehicule() {
           {/* Seats */}
           <div>
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              Cantidad de Asientos *
+              Cantidad de Asientos <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
               value={form.seats}
+              maxLength={3}
+              onInput={(e) => {
+                if (e.target.value.length > 3) {
+                  e.target.value = e.target.value.slice(0, 3);
+                }
+              }}
               onChange={(e) => setField("seats", e.target.value)}
               placeholder="Ej. 24"
               min="1"
+              max="999"
               className={inputClass(!!errors.seats)}
             />
             {errors.seats && (
@@ -327,7 +335,7 @@ export default function AddVehicule() {
           {/* Route */}
           <div>
             <label className="block text-[#2D1E2F] text-sm mb-1.5">
-              Ruta *
+              Ruta <span className="text-red-500">*</span>
             </label>
             <select
               value={form.routeId}

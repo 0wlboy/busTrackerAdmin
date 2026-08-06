@@ -69,7 +69,7 @@ export default function UpdateUser() {
     // Expresiones regulares de validación
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const cedulaRegex = /^\d+$/;
-    const phoneRegex = /^\+?[0-9\s\-]{7,15}$/;
+    const phoneRegex = /^\d{7,15}$/;
 
     // Nombre completo
     if (!form.name.trim()) {
@@ -98,11 +98,14 @@ export default function UpdateUser() {
         "La cédula debe contener únicamente números. Remueve cualquier letra, espacio, guión o punto.";
     }
 
-    // Teléfono (opcional)
-    const telefonoStr = String(form.telefono ?? "");
-    if (telefonoStr.trim() && !phoneRegex.test(telefonoStr.trim())) {
+    // Teléfono
+    const phoneStr = String(form.telefono ?? "");
+    if (!phoneStr.trim()) {
       e.telefono =
-        "El número telefónico no es válido. Asegúrate de ingresar entre 7 y 15 dígitos numéricos (ej. +584120000000).";
+        "El número telefónico es requerido. Por favor, ingresa tu número de teléfono.";
+    } else if (!phoneRegex.test(phoneStr.trim())) {
+      e.telefono =
+        "El número telefónico debe contener únicamente números y tener entre 7 y 15 dígitos.";
     }
 
     return e;
@@ -238,6 +241,7 @@ export default function UpdateUser() {
             <input
               type="text"
               value={form.name}
+              maxLength={50}
               onChange={(e) => set("name", e.target.value)}
               placeholder="Ej. Juan Pérez"
               className={inputClass(!!errors.name)}
@@ -262,6 +266,7 @@ export default function UpdateUser() {
             <input
               type="email"
               value={form.email}
+              maxLength={50}
               onChange={(e) => set("email", e.target.value)}
               placeholder="usuario@empresa.com"
               className={inputClass(!!errors.email)}
@@ -286,6 +291,7 @@ export default function UpdateUser() {
             <input
               type="text"
               value={form.cedula}
+              maxLength={12}
               onChange={(e) => set("cedula", e.target.value.replace(/\D/g, ""))}
               placeholder="Ej. 12345678"
               className={inputClass(!!errors.cedula)}
@@ -306,10 +312,11 @@ export default function UpdateUser() {
               Teléfono
             </label>
             <input
-              type="tel"
+              type="text"
               value={form.telefono}
-              onChange={(e) => set("telefono", e.target.value)}
-              placeholder="+1 234 567 8900"
+              maxLength={15}
+              onChange={(e) => set("telefono", e.target.value.replace(/\D/g, ""))}
+              placeholder="04120000000"
               className={inputClass(!!errors.telefono)}
             />
             {errors.telefono && (
@@ -332,9 +339,9 @@ export default function UpdateUser() {
               onChange={(e) => set("role", e.target.value)}
               className={selectClass}
             >
-              <option value="Operador">Conductor</option>
-              <option value="Supervisor">Pasajero</option>
-              <option value="Administrador">Administrador</option>
+              <option value="conductor">Conductor</option>
+              <option value="pasajero">Pasajero</option>
+              <option value="admin">Administrador</option>
             </select>
           </div>
         </div>
