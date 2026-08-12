@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAddRoute } from "../../hooks/useAddRoute";
 import { Input } from "../../components/ui/Input";
-import { Loader2, ArrowLeft, Save, MapPin, Route, Map } from "lucide-react";
+import { Loader2, ArrowLeft, Save, MapPin, Route, Map, Palette } from "lucide-react";
 
 export default function AddRoute() {
   const navigate = useNavigate();
@@ -15,7 +15,16 @@ export default function AddRoute() {
     origin: "",
     destination: "",
     status: "active",
+    color: "#EFCC01",
   });
+
+  // Valida que el hex ingresado sea un color válido
+  const isValidHex = (val) => /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val);
+
+  // Sincroniza el hex input con el color picker y viceversa
+  const handleColorChange = (hex) => {
+    setFormData((prev) => ({ ...prev, color: hex }));
+  };
 
   // Manejador de cambios en los inputs
   const handleChange = (e) => {
@@ -155,6 +164,78 @@ export default function AddRoute() {
               <option value="active">Activa</option>
               <option value="inactive">Inactiva</option>
             </select>
+          </div>
+
+          {/* Color de la Ruta */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-[#2D1E2F]/80 flex items-center gap-2">
+              <Palette className="w-4 h-4 text-[#EFCC01]" />
+              Color de la Ruta
+            </label>
+            <div className="flex items-center gap-3">
+              {/* Native color picker */}
+              <div className="relative shrink-0">
+                <input
+                  type="color"
+                  value={isValidHex(formData.color) ? formData.color : "#EFCC01"}
+                  onChange={(e) => handleColorChange(e.target.value)}
+                  className="w-12 h-10 rounded-lg border border-[#2D1E2F]/15 cursor-pointer p-0.5 bg-[#FFF9D6]"
+                  title="Seleccionar color"
+                />
+              </div>
+              {/* Hex text input */}
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#2D1E2F]/40 text-sm font-mono select-none">#</span>
+                <input
+                  type="text"
+                  value={formData.color.replace("#", "")}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^0-9A-Fa-f]/g, "").slice(0, 6);
+                    handleColorChange(`#${raw}`);
+                  }}
+                  placeholder="EFCC01"
+                  maxLength={6}
+                  className="w-full h-10 rounded-md border border-[#2D1E2F]/15 bg-[#FFF9D6] pl-7 pr-3 text-sm font-mono text-[#2D1E2F] outline-none focus-visible:border-[#EFCC01] focus:ring-2 focus:ring-[#EFCC01]/30 transition-all"
+                />
+              </div>
+              {/* Color preview chip — replica del marcador del mapa */}
+              <div className="shrink-0 relative" style={{ width: 40, height: 40 }}>
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    background: isValidHex(formData.color) ? formData.color : "#EFCC01",
+                    border: "3px solid #2D1E2F",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 4px 12px rgba(45,30,47,0.35)",
+                    position: "relative",
+                  }}
+                  title={formData.color}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2D1E2F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 17a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
+                    <path d="M19 17a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
+                    <path d="M13 16V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10l2 2h10zM13 6l3 5h3l1 2v3h-1m-3-10v10"/>
+                  </svg>
+                  <span style={{
+                    position: "absolute",
+                    top: -5,
+                    right: -5,
+                    width: 10,
+                    height: 10,
+                    background: "#22c55e",
+                    border: "2px solid white",
+                    borderRadius: "50%",
+                  }} />
+                </div>
+              </div>
+            </div>
+            <p className="text-[#2D1E2F]/40 text-xs">
+              Este color identificará la ruta en el mapa y la app.
+            </p>
           </div>
 
           {/* Acciones */}

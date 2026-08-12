@@ -24,6 +24,7 @@ export function useAddRoute() {
         origin: routeData.origin,
         destination: routeData.destination,
         status: routeData.status || "active",
+        color: routeData.color || "#EFCC01",
         createdAt: new Date().toISOString(),
         isDeleted: false,
       };

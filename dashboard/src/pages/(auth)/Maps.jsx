@@ -30,15 +30,18 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-// ─── Custom bus icon using the brand colors ────────────────────────────────
-const createBusIcon = () =>
-  L.divIcon({
+// ─── Custom bus icon using the route color ─────────────────────────────────
+const HEX_RE = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+const createBusIcon = (color) => {
+  // Validate the color is a proper hex — fall back to brand yellow if not
+  const safeColor = HEX_RE.test(color) ? color : "#EFCC01";
+  return L.divIcon({
     className: "",
     html: `
       <div style="
         width: 38px;
         height: 38px;
-        background: #EFCC01;
+        background: ${safeColor};
         border: 3px solid #2D1E2F;
         border-radius: 50%;
         display: flex;
@@ -68,6 +71,7 @@ const createBusIcon = () =>
     iconAnchor: [19, 19],
     popupAnchor: [0, -22],
   });
+};
 
 // ─── Component to auto-fit map to visible markers ─────────────────────────
 function FitBounds({ buses }) {
@@ -106,7 +110,7 @@ function StatBadge({ icon: Icon, label, value, accent }) {
 }
 
 // ─── Route filter button ───────────────────────────────────────────────────
-function RouteFilterBtn({ label, count, active, onClick }) {
+function RouteFilterBtn({ label, color, count, active, onClick }) {
   return (
     <button
       onClick={onClick}
@@ -116,7 +120,15 @@ function RouteFilterBtn({ label, count, active, onClick }) {
           : "bg-[#FFF9D6] text-[#2D1E2F]/70 border-[#2D1E2F]/10 hover:border-[#EFCC01]/50 hover:text-[#2D1E2F]"
       }`}
     >
-      <span className="truncate text-left">{label}</span>
+      <div className="flex items-center gap-2 truncate">
+        {color && (
+          <span
+            className="w-2.5 h-2.5 rounded-full shrink-0 border border-[#2D1E2F]/20"
+            style={{ backgroundColor: color }}
+          />
+        )}
+        <span className="truncate text-left">{label}</span>
+      </div>
       {count !== undefined && (
         <span
           className={`shrink-0 min-w-[20px] h-5 px-1.5 rounded-full flex items-center justify-center text-[10px] font-bold ${
@@ -134,6 +146,7 @@ function RouteFilterBtn({ label, count, active, onClick }) {
 
 // ─── Sidebar bus card ─────────────────────────────────────────────────────────
 function BusCard({ bus, selected, onClick }) {
+  const routeColor = bus.route?.color || "#EFCC01";
   return (
     <button
       onClick={onClick}
@@ -145,15 +158,10 @@ function BusCard({ bus, selected, onClick }) {
     >
       <div className="flex items-center gap-3">
         <div
-          className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-            selected
-              ? "bg-[#2D1E2F]"
-              : "bg-[#EFCC01]/20 border border-[#EFCC01]/40"
-          }`}
+          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border border-[#2D1E2F]/30 shadow-xs"
+          style={{ backgroundColor: routeColor }}
         >
-          <Bus
-            className={`w-4 h-4 ${selected ? "text-[#EFCC01]" : "text-[#2D1E2F]"}`}
-          />
+          <Bus className="w-4 h-4 text-[#2D1E2F]" />
         </div>
         <div className="flex-1 min-w-0">
           <p
@@ -170,13 +178,19 @@ function BusCard({ bus, selected, onClick }) {
           >
             {bus.driverName ?? "Conductor desconocido"}
           </p>
-          <p
-            className={`text-[10px] truncate mt-0.5 ${
-              selected ? "text-[#2D1E2F]/60" : "text-[#2D1E2F]/40"
-            }`}
-          >
-            {bus.route.name ?? bus.route.id ?? "Sin ruta asignada"}
-          </p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span
+              className="w-2 h-2 rounded-full shrink-0 border border-[#2D1E2F]/20"
+              style={{ backgroundColor: routeColor }}
+            />
+            <p
+              className={`text-[10px] truncate ${
+                selected ? "text-[#2D1E2F]/60" : "text-[#2D1E2F]/40"
+              }`}
+            >
+              {bus.route.name ?? bus.route.id ?? "Sin ruta asignada"}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -315,6 +329,7 @@ export default function Maps() {
                 <RouteFilterBtn
                   key={route.id}
                   label={route.name}
+                  color={route.color}
                   count={countByRoute(route.id)}
                   active={activeRoute === route.id}
                   onClick={() => handleRouteFilter(route.id)}
@@ -489,9 +504,9 @@ export default function Maps() {
           {/* Bus markers — only for visibleBuses */}
           {visibleBuses.map((bus) => (
             <Marker
-              key={bus.id}
+              key={`${bus.id}-${bus.route.color ?? "default"}`}
               position={[bus.lat, bus.lng]}
-              icon={createBusIcon()}
+              icon={createBusIcon(bus.route.color)}
               ref={(ref) => {
                 if (ref) markersRef.current[bus.id] = ref;
               }}

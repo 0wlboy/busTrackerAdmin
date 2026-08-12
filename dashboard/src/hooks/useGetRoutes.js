@@ -94,6 +94,7 @@ export function useGetRoutes() {
   const routeList = routes.map((r) => ({
     id: r.id,
     name: r.name ?? r.id,
+    color: r.color || "#EFCC01",
   }));
 
   const topRoute = routes.length > 0

@@ -24,6 +24,8 @@ export function useGetTracking() {
 
   // Cache de datos de vehículos para no repetir consultas
   const vehicleCache = useRef({});
+  // Cache de datos de rutas para no repetir consultas
+  const routeCache = useRef({});
 
   /**
    * Dado un driverId, busca en la colección "vehiculos" el documento
@@ -65,11 +67,29 @@ export function useGetTracking() {
           if (!snapshotDriver.empty) {
             const vehicleDoc = snapshotDriver.docs[0];
             vehicleData = { id: vehicleDoc.id, ...vehicleDoc.data() };
+          } else {
+            // Direct document lookup by driverId key in vehicles or vehiculos
+            const directDocRef = doc(db, "vehicles", driverId);
+            const directSnap = await getDoc(directDocRef);
+            if (directSnap.exists()) {
+              vehicleData = { id: directSnap.id, ...directSnap.data() };
+            } else {
+              const directVehiculosRef = doc(db, "vehiculos", driverId);
+              const directVehiculosSnap = await getDoc(directVehiculosRef);
+              if (directVehiculosSnap.exists()) {
+                vehicleData = { id: directVehiculosSnap.id, ...directVehiculosSnap.data() };
+              }
+            }
           }
         }
       }
 
-      vehicleCache.current[driverId] = vehicleData;
+      // Solo cachear si se encontró un vehículo.
+      // Si vehicleData es null, NO lo cacheamos para poder reintentar
+      // en el siguiente snapshot de onSnapshot.
+      if (vehicleData !== null) {
+        vehicleCache.current[driverId] = vehicleData;
+      }
       return vehicleData;
     } catch (err) {
       console.error(
@@ -113,16 +133,40 @@ export function useGetTracking() {
 
           let routeId = vehicleData?.routeId ?? null;
           let routeName = "Sin ruta asignada";
+          let routeColor = "#EFCC01"; // default brand color
 
           if (routeId) {
-            try {
-              const routeSnap = await getDoc(doc(db, "vehicleRoutes", routeId));
-              if (routeSnap.exists()) {
-                const routeData = routeSnap.data();
-                routeName = routeData.name ?? "Sin nombre de ruta";
+            // Usar caché de ruta solo si tiene un color explícito.
+            // Si la entrada en caché no tiene color propio (era un fallback),
+            // forzamos una nueva lectura de Firestore.
+            if (routeCache.current[routeId]?.color) {
+              const cached = routeCache.current[routeId];
+              routeName = cached.name;
+              routeColor = cached.color;
+            } else {
+              try {
+                const routeSnap = await getDoc(doc(db, "vehicleRoutes", routeId));
+                if (routeSnap.exists()) {
+                  const routeData = routeSnap.data();
+                  routeName = routeData.name ?? "Sin nombre de ruta";
+                  // Solo cachear cuando el color está definido explícitamente
+                  // en el documento de Firestore.
+                  const firestoreColor = routeData.color ?? null;
+                  if (firestoreColor) {
+                    routeColor = firestoreColor;
+                    routeCache.current[routeId] = { name: routeName, color: routeColor };
+                    console.log(`[tracking] Ruta ${routeId} — color: ${routeColor}`);
+                  } else {
+                    // El documento existe pero no tiene campo color;
+                    // usamos el fallback visual sin cachear para reintentar
+                    // en el próximo snapshot (el usuario puede editar la ruta).
+                    routeColor = "#EFCC01";
+                    console.warn(`[tracking] Ruta ${routeId} sin campo 'color' en Firestore. Usando fallback.`);
+                  }
+                }
+              } catch (error) {
+                console.error("Error obteniendo ruta:", error);
               }
-            } catch (error) {
-              console.error("Error obteniendo ruta:", error);
             }
           }
 
@@ -138,6 +182,7 @@ export function useGetTracking() {
           const route = {
             id: routeId ?? "Sin ruta asignada",
             name: routeName ?? "Sin ruta asignada",
+            color: routeColor,
           };
 
           return {

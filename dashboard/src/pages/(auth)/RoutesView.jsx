@@ -14,6 +14,9 @@ import {
   Truck,
   Loader2,
   Trash2,
+  Pencil,
+  Palette,
+  X,
 } from "lucide-react";
 
 const STATUSES = ["Todos", "Activa", "Inactiva"];
@@ -30,6 +33,48 @@ export default function RoutesPage() {
   const [routeToDelete, setRouteToDelete] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Estados para edición de ruta
+  const [routeToEdit, setRouteToEdit] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    origin: "",
+    destination: "",
+    color: "#EFCC01",
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  const openEditModal = (route) => {
+    setRouteToEdit(route);
+    setEditFormData({
+      name: route.name || "",
+      origin: route.origin || "",
+      destination: route.destination || "",
+      color: route.color || "#EFCC01",
+    });
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!routeToEdit) return;
+    setSavingEdit(true);
+    try {
+      const routeRef = doc(db, "vehicleRoutes", routeToEdit.id);
+      await updateDoc(routeRef, {
+        name: editFormData.name.trim(),
+        origin: editFormData.origin.trim(),
+        destination: editFormData.destination.trim(),
+        color: editFormData.color,
+      });
+      setRouteToEdit(null);
+      refresh();
+    } catch (err) {
+      console.error("Error al actualizar ruta:", err);
+      alert("Hubo un error al guardar los cambios de la ruta.");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
 
   const handleToggleStatus = async (routeId, currentStatus) => {
     if (updating) return;
@@ -197,13 +242,28 @@ export default function RoutesPage() {
                 className="bg-[#FFF3AD] border border-[#2D1E2F]/10 rounded-2xl p-5 hover:border-[#2D1E2F]/20 transition-all space-y-4"
               >
                 <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-[#2D1E2F] text-base font-semibold">{route.name}</h3>
-                    <p className="text-[#2D1E2F]/40 text-xs mt-0.5">
-                      {route.distance}
-                    </p>
+                  <div className="flex items-center gap-2.5">
+                    <span
+                      className="w-4 h-4 rounded-full border-2 border-[#2D1E2F] shrink-0 shadow-xs"
+                      style={{ backgroundColor: route.color || "#EFCC01" }}
+                      title={`Color de ruta: ${route.color || "#EFCC01"}`}
+                    />
+                    <div>
+                      <h3 className="text-[#2D1E2F] text-base font-semibold">{route.name}</h3>
+                      <p className="text-[#2D1E2F]/40 text-xs mt-0.5">
+                        {route.distance}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => openEditModal(route)}
+                      className="p-1.5 text-[#2D1E2F]/70 bg-[#FFF9D6] hover:bg-[#FFF9D6]/80 border border-[#2D1E2F]/15 rounded-lg transition-colors cursor-pointer"
+                      title="Editar ruta"
+                      type="button"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={() => handleToggleStatus(route.id, route.status)}
                       disabled={updating === route.id}
@@ -298,6 +358,139 @@ export default function RoutesPage() {
         onConfirm={handleConfirmDelete}
         loading={deleting}
       />
+
+      {/* Modal para Editar Ruta */}
+      {routeToEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
+          <div className="bg-[#FFF3AD] border border-[#2D1E2F]/15 rounded-3xl p-6 w-full max-w-lg shadow-2xl space-y-5 relative">
+            <button
+              onClick={() => setRouteToEdit(null)}
+              className="absolute right-4 top-4 p-1.5 text-[#2D1E2F]/40 hover:text-[#2D1E2F] rounded-full transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div>
+              <h2 className="text-[#2D1E2F] font-bold text-lg">Editar Ruta</h2>
+              <p className="text-[#2D1E2F]/50 text-xs mt-0.5">
+                Modifica los datos y el color oficial de la ruta
+              </p>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-[#2D1E2F]/80 mb-1">
+                  Nombre de la Ruta
+                </label>
+                <input
+                  type="text"
+                  value={editFormData.name}
+                  onChange={(e) =>
+                    setEditFormData((p) => ({ ...p, name: e.target.value }))
+                  }
+                  required
+                  className="w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 rounded-xl px-3 py-2 text-sm text-[#2D1E2F] focus:outline-none focus:border-[#EFCC01] focus:ring-2 focus:ring-[#EFCC01]/20"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-[#2D1E2F]/80 mb-1">
+                    Origen
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.origin}
+                    onChange={(e) =>
+                      setEditFormData((p) => ({ ...p, origin: e.target.value }))
+                    }
+                    required
+                    className="w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 rounded-xl px-3 py-2 text-sm text-[#2D1E2F] focus:outline-none focus:border-[#EFCC01] focus:ring-2 focus:ring-[#EFCC01]/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#2D1E2F]/80 mb-1">
+                    Destino
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.destination}
+                    onChange={(e) =>
+                      setEditFormData((p) => ({
+                        ...p,
+                        destination: e.target.value,
+                      }))
+                    }
+                    required
+                    className="w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 rounded-xl px-3 py-2 text-sm text-[#2D1E2F] focus:outline-none focus:border-[#EFCC01] focus:ring-2 focus:ring-[#EFCC01]/20"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#2D1E2F]/80 mb-1 flex items-center gap-1.5">
+                  <Palette className="w-3.5 h-3.5 text-[#EFCC01]" />
+                  Color de la Ruta
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={editFormData.color}
+                    onChange={(e) =>
+                      setEditFormData((p) => ({ ...p, color: e.target.value }))
+                    }
+                    className="w-10 h-9 rounded-lg border border-[#2D1E2F]/15 cursor-pointer p-0.5 bg-[#FFF9D6]"
+                  />
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#2D1E2F]/40 text-xs font-mono">
+                      #
+                    </span>
+                    <input
+                      type="text"
+                      value={editFormData.color.replace("#", "")}
+                      maxLength={6}
+                      onChange={(e) => {
+                        const raw = e.target.value
+                          .replace(/[^0-9A-Fa-f]/g, "")
+                          .slice(0, 6);
+                        setEditFormData((p) => ({ ...p, color: `#${raw}` }));
+                      }}
+                      className="w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 rounded-xl pl-7 pr-3 py-2 text-xs font-mono text-[#2D1E2F] focus:outline-none focus:border-[#EFCC01]"
+                    />
+                  </div>
+                  <div
+                    className="w-9 h-9 rounded-lg border border-[#2D1E2F]/20 shadow-xs shrink-0"
+                    style={{ backgroundColor: editFormData.color }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#2D1E2F]/10">
+                <button
+                  type="button"
+                  onClick={() => setRouteToEdit(null)}
+                  className="px-4 py-2 text-xs font-medium text-[#2D1E2F]/60 bg-[#FFF9D6] border border-[#2D1E2F]/15 rounded-xl hover:bg-[#2D1E2F]/5"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingEdit}
+                  className="px-5 py-2 text-xs font-medium text-[#2D1E2F] bg-[#EFCC01] hover:bg-[#EFCC01]/80 rounded-xl shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {savingEdit ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Guardando...
+                    </>
+                  ) : (
+                    "Guardar Cambios"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
