@@ -19,7 +19,7 @@ export default function AddUser() {
     name: "",
     email: "",
     cedula: "",
-    role: "",
+    role: "conductor",
     password: "",
     confirmPassword: "",
     phone: "",
@@ -86,6 +86,11 @@ export default function AddUser() {
     if (form.password !== form.confirmPassword) {
       e.confirmPassword =
         "Las contraseñas no coinciden. Asegúrate de escribir exactamente la misma contraseña en ambos campos.";
+    }
+
+    // Rol
+    if (!form.role) {
+      e.role = "Debes seleccionar un rol para el usuario.";
     }
 
     return e;
@@ -330,6 +335,15 @@ export default function AddUser() {
               <option value="pasajero">Pasajero</option>
               <option value="admin">Administrador</option>
             </select>
+            {errors.role && (
+              <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
+                <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
+                <div>
+                  <span className="font-semibold block">Alerta en rol</span>
+                  <span>{errors.role}</span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="relative">

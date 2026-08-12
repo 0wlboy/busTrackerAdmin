@@ -48,9 +48,9 @@ export function useAddVehicle() {
       await setDoc(vehicleRef, {
         driverId: driverId,
         imageUri: imageUrl,
-        routeId: routeId,
-        plate: plate,
-        seats: Number(seats),
+        routeId: routeId || "",
+        plate: plate || "",
+        seats: Number(seats) || 0,
         createdAt: serverTimestamp(),
         modifiedAt: serverTimestamp(),
       });

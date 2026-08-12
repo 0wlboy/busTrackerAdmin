@@ -89,9 +89,9 @@ export function useUpdateVehicle() {
         await setDoc(newVehicleRef, {
           driverId: newDriverId,
           imageUri: imageUrl,
-          routeId: routeId,
-          plate: plate,
-          seats: Number(seats),
+          routeId: routeId || "",
+          plate: plate || "",
+          seats: Number(seats) || 0,
           createdAt: serverTimestamp(),
           modifiedAt: serverTimestamp(),
         });
@@ -124,9 +124,9 @@ export function useUpdateVehicle() {
         const vehicleRef = doc(db, "vehicles", oldDriverId);
         await updateDoc(vehicleRef, {
           imageUri: imageUrl,
-          routeId: routeId,
-          plate: plate,
-          seats: Number(seats),
+          routeId: routeId || "",
+          plate: plate || "",
+          seats: Number(seats) || 0,
           modifiedAt: serverTimestamp(),
         });
       }

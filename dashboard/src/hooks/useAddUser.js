@@ -61,7 +61,7 @@ export function useAddUser() {
       const newUserData = {
         userName: userData.name,
         email: userData.email,
-        role: userData.role,
+        role: userData.role || "conductor",
         phone: userData.phone || "",
         cedula: userData.cedula || "",
         isOnline: false,

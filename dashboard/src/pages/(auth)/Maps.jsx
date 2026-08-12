@@ -15,6 +15,8 @@ import {
   Navigation,
   LayoutGrid,
   Route,
+  Search,
+  X,
 } from "lucide-react";
 
 // ─── Fix Leaflet default icon paths (Vite asset issue) ───────────────────────
@@ -162,14 +164,21 @@ function BusCard({ bus, selected, onClick }) {
             {bus.vehicle.plate}
           </p>
           <p
-            className={`text-xs truncate mt-0.5 ${
-              selected ? "text-[#2D1E2F]/70" : "text-[#2D1E2F]/50"
+            className={`text-xs truncate mt-0.5 font-medium ${
+              selected ? "text-[#2D1E2F]/80" : "text-[#2D1E2F]/70"
+            }`}
+          >
+            {bus.driverName ?? "Conductor desconocido"}
+          </p>
+          <p
+            className={`text-[10px] truncate mt-0.5 ${
+              selected ? "text-[#2D1E2F]/60" : "text-[#2D1E2F]/40"
             }`}
           >
             {bus.route.name ?? bus.route.id ?? "Sin ruta asignada"}
           </p>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           <span
             className={`text-xs font-medium ${selected ? "text-[#2D1E2F]/70" : "text-green-600"}`}
@@ -190,20 +199,31 @@ export default function Maps() {
   const [selectedBus, setSelectedBus] = useState(null);
   const [detailBus, setDetailBus] = useState(null); // bus cuyo panel está abierto
   const [activeRoute, setActiveRoute] = useState(null); // null = "Todos"
+  const [searchQuery, setSearchQuery] = useState("");
   const mapRef = useRef(null);
   const markersRef = useRef({});
 
-  // ── Derived: buses visible after filter ──────────────────────────────────
-  const visibleBuses =
+  // ── Derived: buses visible after route filter ─────────────────────────────
+  const routeFilteredBuses =
     activeRoute === null
       ? buses
       : buses.filter((b) => b.route.id === activeRoute);
+
+  // ── Derived: buses visible after route filter + driver name search ────────
+  const visibleBuses = searchQuery.trim()
+    ? routeFilteredBuses.filter((b) =>
+        (b.driverName ?? "").toLowerCase().includes(searchQuery.trim().toLowerCase())
+      )
+    : routeFilteredBuses;
 
   // ── Count buses per route for the filter badges ──────────────────────────
   const countByRoute = useCallback(
     (routeId) => buses.filter((b) => b.route.id === routeId).length,
     [buses],
   );
+
+  // ── Clear search query ────────────────────────────────────────────────────
+  const handleClearSearch = () => setSearchQuery("");
 
   // Format last updated time
   const formattedTime = lastUpdated
@@ -224,11 +244,12 @@ export default function Maps() {
     }
   };
 
-  // When switching route, clear selected bus and close detail panel
+  // When switching route, clear selected bus, close detail panel and clear search
   const handleRouteFilter = (routeId) => {
     setActiveRoute(routeId);
     setSelectedBus(null);
     setDetailBus(null);
+    setSearchQuery("");
   };
 
   return (
@@ -303,6 +324,42 @@ export default function Maps() {
           </div>
         </div>
 
+        {/* ── Driver name search ───────────────────────────────────── */}
+        <div className="px-3 pt-3 pb-2 border-b border-[#2D1E2F]/10">
+          <div className="flex items-center gap-1.5 mb-2 px-1">
+            <Search className="w-3.5 h-3.5 text-[#2D1E2F]/40" />
+            <span className="text-[#2D1E2F]/40 text-xs font-medium uppercase tracking-wide">
+              Buscar conductor
+            </span>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#2D1E2F]/30 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Nombre del conductor..."
+              className="w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 text-[#2D1E2F] text-xs rounded-xl pl-8 pr-8 py-2.5 focus:outline-none focus:border-[#EFCC01] focus:ring-2 focus:ring-[#EFCC01]/20 placeholder-[#2D1E2F]/30 transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={handleClearSearch}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-[#2D1E2F]/30 hover:text-[#2D1E2F] hover:bg-[#2D1E2F]/10 transition-colors cursor-pointer"
+                title="Limpiar búsqueda"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+          {searchQuery.trim() && (
+            <p className="text-[#2D1E2F]/40 text-[10px] mt-1.5 px-1">
+              {visibleBuses.length === 0
+                ? "Sin resultados"
+                : `${visibleBuses.length} resultado${visibleBuses.length !== 1 ? "s" : ""}`}
+            </p>
+          )}
+        </div>
+
         {/* Last updated */}
         <div className="px-4 py-2 border-b border-[#2D1E2F]/10 flex items-center gap-2">
           <Clock className="w-3.5 h-3.5 text-[#2D1E2F]/40" />
@@ -336,30 +393,43 @@ export default function Maps() {
           ) : visibleBuses.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 gap-3 px-2">
               <div className="w-14 h-14 rounded-2xl bg-[#EFCC01]/20 border border-[#EFCC01]/30 flex items-center justify-center">
-                {activeRoute !== null ? (
+                {searchQuery.trim() ? (
+                  <Search className="w-7 h-7 text-[#2D1E2F]/40" />
+                ) : activeRoute !== null ? (
                   <LayoutGrid className="w-7 h-7 text-[#2D1E2F]/40" />
                 ) : (
                   <Bus className="w-7 h-7 text-[#2D1E2F]/40" />
                 )}
               </div>
               <p className="text-[#2D1E2F]/60 text-sm text-center font-medium">
-                {activeRoute !== null
-                  ? "Sin vehículos en esta ruta"
-                  : "Sin autobuses en línea"}
+                {searchQuery.trim()
+                  ? "Sin resultados"
+                  : activeRoute !== null
+                    ? "Sin vehículos en esta ruta"
+                    : "Sin autobuses en línea"}
               </p>
               <p className="text-[#2D1E2F]/30 text-xs text-center leading-relaxed">
-                {activeRoute !== null
-                  ? "No hay vehículos activos en esta ruta en este momento."
-                  : "No hay vehículos activos en este momento. Los autobuses aparecerán aquí cuando estén en línea."}
+                {searchQuery.trim()
+                  ? `No hay conductores en línea con el nombre "${searchQuery.trim()}".`
+                  : activeRoute !== null
+                    ? "No hay vehículos activos en esta ruta en este momento."
+                    : "No hay vehículos activos en este momento. Los autobuses aparecerán aquí cuando estén en línea."}
               </p>
-              {activeRoute !== null && (
+              {searchQuery.trim() ? (
+                <button
+                  onClick={handleClearSearch}
+                  className="text-xs text-[#2D1E2F]/50 underline underline-offset-2 hover:text-[#2D1E2F] transition-colors cursor-pointer"
+                >
+                  Limpiar búsqueda
+                </button>
+              ) : activeRoute !== null ? (
                 <button
                   onClick={() => handleRouteFilter(null)}
                   className="text-xs text-[#2D1E2F]/50 underline underline-offset-2 hover:text-[#2D1E2F] transition-colors cursor-pointer"
                 >
                   Ver todos los vehículos
                 </button>
-              )}
+              ) : null}
             </div>
           ) : (
             visibleBuses.map((bus) => (

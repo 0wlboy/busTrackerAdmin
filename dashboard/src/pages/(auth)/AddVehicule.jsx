@@ -108,6 +108,7 @@ export default function AddVehicule() {
       const addResult = await addVehicle({
         driverId: form.driverId.trim(),
         routeId: form.routeId,
+        plate: form.plate.trim(),
         seats: form.seats,
         imgFile: form.imageFile,
       });
