@@ -5,7 +5,7 @@ import {
   createUserWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, GeoPoint, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase/config";
 import app from "../firebase/config";
 
@@ -13,6 +13,7 @@ import app from "../firebase/config";
  * Hook para agregar un nuevo usuario al sistema sin desloguear al administrador actual.
  * Utiliza una instancia secundaria de Firebase para realizar el registro en Authentication,
  * y luego guarda los datos adicionales en la colección 'users' de Firestore.
+ * Si el usuario es un conductor, también crea su documento inicial en 'tracking'.
  */
 export function useAddUser() {
   const [loading, setLoading] = useState(false);
@@ -75,6 +76,24 @@ export function useAddUser() {
         "useAddUser: ✅ Datos guardados correctamente en Firestore:",
         newUserData,
       );
+
+      // 4. Si el rol es conductor, crear el documento en la colección 'tracking'
+      if (newUserData.role === "conductor") {
+        console.log(
+          "useAddUser: Creando documento inicial en colección 'tracking' para el conductor...",
+        );
+        const trackingDocRef = doc(db, "tracking", user.uid);
+        await setDoc(trackingDocRef, {
+          driverId: user.uid,
+          online: false,
+          location: new GeoPoint(0, 0),
+          createdAt: serverTimestamp(),
+          lastUpdated: serverTimestamp(),
+        });
+        console.log(
+          "useAddUser: ✅ Documento de tracking creado exitosamente.",
+        );
+      }
 
       // 4. Limpiar la aplicación secundaria para liberar recursos y cerrar sesión
       console.log("useAddUser: Limpiando recursos de la app secundaria...");
