@@ -26,7 +26,7 @@ export function useUpdateUser() {
     }
   };
 
-  const updateUser = async (uid, { name, email, role, telefono, cedula }) => {
+  const updateUser = async (uid, { name, email, role, phone, cedula }) => {
     setLoading(true);
     setError(null);
 
@@ -36,7 +36,7 @@ export function useUpdateUser() {
         userName: name,
         email: email,
         role: role,
-        telefono: telefono || "",
+        phone: phone || "",
         cedula: cedula || "",
         modifiedAt: new Date().toISOString(),
       });

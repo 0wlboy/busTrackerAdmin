@@ -31,7 +31,7 @@ export default function UpdateUser() {
     email: "",
     cedula: "",
     role: "",
-    telefono: "",
+    phone: "",
   });
   const [originalForm, setOriginalForm] = useState(null);
   const [errors, setErrors] = useState({});
@@ -49,7 +49,7 @@ export default function UpdateUser() {
           email: String(res.data.email || ""),
           cedula: String(res.data.cedula ?? ""),
           role: String(res.data.role || ""),
-          telefono: String(res.data.telefono || ""),
+          phone: String(res.data.phone || ""),
         };
         setForm(loaded);
         setOriginalForm(loaded);
@@ -99,12 +99,12 @@ export default function UpdateUser() {
     }
 
     // Teléfono
-    const phoneStr = String(form.telefono ?? "");
+    const phoneStr = String(form.phone ?? "");
     if (!phoneStr.trim()) {
-      e.telefono =
+      e.phone =
         "El número telefónico es requerido. Por favor, ingresa tu número de teléfono.";
     } else if (!phoneRegex.test(phoneStr.trim())) {
-      e.telefono =
+      e.phone =
         "El número telefónico debe contener únicamente números y tener entre 7 y 15 dígitos.";
     }
 
@@ -121,7 +121,7 @@ export default function UpdateUser() {
       form.email.trim() !== (originalForm?.email || "") ||
       form.cedula.trim() !== (originalForm?.cedula || "") ||
       form.role !== (originalForm?.role || "") ||
-      form.telefono.trim() !== (originalForm?.telefono || "");
+      form.phone.trim() !== (originalForm?.phone || "");
 
     if (!hasChanged) {
       setSubmitError("Debes modificar al menos un campo antes de guardar.");
@@ -313,20 +313,20 @@ export default function UpdateUser() {
             </label>
             <input
               type="text"
-              value={form.telefono}
+              value={form.phone}
               maxLength={15}
-              onChange={(e) => set("telefono", e.target.value.replace(/\D/g, ""))}
+              onChange={(e) => set("phone", e.target.value.replace(/\D/g, ""))}
               placeholder="04120000000"
-              className={inputClass(!!errors.telefono)}
+              className={inputClass(!!errors.phone)}
             />
-            {errors.telefono && (
+            {errors.phone && (
               <div className="flex gap-2 bg-[#FEF2F2] border border-[#FCA5A5] rounded-xl p-3 text-[#991B1B] text-xs mt-1.5">
                 <AlertCircle className="w-4 h-4 shrink-0 text-[#EF4444] mt-0.5" />
                 <div>
                   <span className="font-semibold block">
                     Alerta en teléfono
                   </span>
-                  <span>{errors.telefono}</span>
+                  <span>{errors.phone}</span>
                 </div>
               </div>
             )}
