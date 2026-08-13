@@ -30,19 +30,19 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-// ─── Custom bus icon using the route color ─────────────────────────────────
+// ─── Custom bus icon using the route color and stroke color ─────────────────
 const HEX_RE = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
-const createBusIcon = (color) => {
-  // Validate the color is a proper hex — fall back to brand yellow if not
-  const safeColor = HEX_RE.test(color) ? color : "#EFCC01";
+const createBusIcon = (color, strokeColor) => {
+  const backgroundColor = HEX_RE.test(color) ? color : "#EFCC01";
+  const safeStrokeColor = HEX_RE.test(strokeColor) ? strokeColor : "#2D1E2F";
   return L.divIcon({
     className: "",
     html: `
       <div style="
         width: 38px;
         height: 38px;
-        background: ${safeColor};
-        border: 3px solid #2D1E2F;
+        background: ${backgroundColor};
+        border: 3px solid ${safeStrokeColor};
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -50,7 +50,7 @@ const createBusIcon = (color) => {
         box-shadow: 0 4px 12px rgba(45,30,47,0.35);
         position: relative;
       ">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2D1E2F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${safeStrokeColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 17a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
           <path d="M19 17a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
           <path d="M13 16V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10l2 2h10zM13 6l3 5h3l1 2v3h-1m-3-10v10"/>
@@ -147,6 +147,7 @@ function RouteFilterBtn({ label, color, count, active, onClick }) {
 // ─── Sidebar bus card ─────────────────────────────────────────────────────────
 function BusCard({ bus, selected, onClick }) {
   const routeColor = bus.route?.color || "#EFCC01";
+  const strokeColor = bus.route?.strokeColor || "#2D1E2F";
   return (
     <button
       onClick={onClick}
@@ -158,10 +159,13 @@ function BusCard({ bus, selected, onClick }) {
     >
       <div className="flex items-center gap-3">
         <div
-          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border border-[#2D1E2F]/30 shadow-xs"
-          style={{ backgroundColor: routeColor }}
+          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 shadow-xs"
+          style={{
+            backgroundColor: routeColor,
+            border: `2px solid ${strokeColor}`,
+          }}
         >
-          <Bus className="w-4 h-4 text-[#2D1E2F]" />
+          <Bus className="w-4 h-4" style={{ color: strokeColor }} />
         </div>
         <div className="flex-1 min-w-0">
           <p
@@ -226,7 +230,9 @@ export default function Maps() {
   // ── Derived: buses visible after route filter + driver name search ────────
   const visibleBuses = searchQuery.trim()
     ? routeFilteredBuses.filter((b) =>
-        (b.driverName ?? "").toLowerCase().includes(searchQuery.trim().toLowerCase())
+        (b.driverName ?? "")
+          .toLowerCase()
+          .includes(searchQuery.trim().toLowerCase()),
       )
     : routeFilteredBuses;
 
@@ -504,9 +510,9 @@ export default function Maps() {
           {/* Bus markers — only for visibleBuses */}
           {visibleBuses.map((bus) => (
             <Marker
-              key={`${bus.id}-${bus.route.color ?? "default"}`}
+              key={`${bus.id}-${bus.route.color ?? "default"}-${bus.route.strokeColor ?? "default"}`}
               position={[bus.lat, bus.lng]}
-              icon={createBusIcon(bus.route.color)}
+              icon={createBusIcon(bus.route.color, bus.route.strokeColor)}
               ref={(ref) => {
                 if (ref) markersRef.current[bus.id] = ref;
               }}

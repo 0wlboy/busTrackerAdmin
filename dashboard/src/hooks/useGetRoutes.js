@@ -65,11 +65,18 @@ export function useGetRoutes() {
         const trackingResults = await Promise.all(trackingPromises);
         activeVehicles = trackingResults.reduce((acc, curr) => acc + curr, 0);
 
+        const vehicles = vehiclesSnapshot.docs.map((vDoc) => ({
+          id: vDoc.id,
+          plate: vDoc.data().plate || "Sin placa",
+          ...vDoc.data(),
+        }));
+
         routesData.push({
           id: routeId,
           ...routeData,
           totalVehicles,
           activeVehicles,
+          vehicles,
         });
       }
 
@@ -95,6 +102,7 @@ export function useGetRoutes() {
     id: r.id,
     name: r.name ?? r.id,
     color: r.color || "#EFCC01",
+    strokeColor: r.strokeColor || "#2D1E2F",
   }));
 
   const topRoute = routes.length > 0

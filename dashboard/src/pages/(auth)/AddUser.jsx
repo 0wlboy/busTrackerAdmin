@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAddUser } from "../../hooks/useAddUser";
 import {
@@ -27,6 +27,34 @@ export default function AddUser() {
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+
+  const resetForm = () => {
+    setForm({
+      name: "",
+      email: "",
+      cedula: "",
+      role: "conductor",
+      password: "",
+      confirmPassword: "",
+      phone: "",
+    });
+    setErrors({});
+    setSubmitError(null);
+    setShowPassword(false);
+  };
+
+  // Limpiar los campos del formulario al desmontar el componente (salir de la pantalla)
+  useEffect(() => {
+    return () => {
+      resetForm();
+    };
+  }, []);
+
+  const handleCancel = () => {
+    console.log("AddUser: Limpiando formulario y regresando...");
+    resetForm();
+    navigate(-1);
+  };
 
   const validate = () => {
     const e = {};
@@ -196,10 +224,7 @@ export default function AddUser() {
       {/* Header */}
       <div className="flex items-center gap-4">
         <button
-          onClick={() => {
-            console.log("AddUser: Botón regresar presionado");
-            navigate(-1);
-          }}
+          onClick={handleCancel}
           className="p-2 rounded-xl text-[#2D1E2F]/50 hover:text-[#2D1E2F] hover:bg-[#FFF3AD] transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -413,10 +438,7 @@ export default function AddUser() {
         <div className="flex items-center gap-3 pt-2 border-t border-[#2D1E2F]/10">
           <button
             type="button"
-            onClick={() => {
-              console.log("AddUser: Cancelando operación y regresando...");
-              navigate(-1);
-            }}
+            onClick={handleCancel}
             className="flex-1 bg-[#FFF9D6] hover:bg-[#2D1E2F]/8 text-[#2D1E2F]/60 rounded-xl px-4 py-3 text-sm transition-colors border border-[#2D1E2F]/15"
           >
             Cancelar
