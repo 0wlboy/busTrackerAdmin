@@ -102,7 +102,6 @@ export function useGetRoutes() {
     id: r.id,
     name: r.name ?? r.id,
     color: r.color || "#EFCC01",
-    strokeColor: r.strokeColor || "#2D1E2F",
   }));
 
   const topRoute = routes.length > 0

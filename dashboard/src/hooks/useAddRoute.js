@@ -25,7 +25,6 @@ export function useAddRoute() {
         destination: routeData.destination,
         status: routeData.status || "active",
         color: routeData.color || "#EFCC01",
-        strokeColor: routeData.strokeColor || "#2D1E2F",
         createdAt: new Date().toISOString(),
         isDeleted: false,
       };

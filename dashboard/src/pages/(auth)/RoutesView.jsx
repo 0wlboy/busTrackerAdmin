@@ -42,7 +42,6 @@ export default function RoutesPage() {
     origin: "",
     destination: "",
     color: "#EFCC01",
-    strokeColor: "#2D1E2F",
   });
   const [savingEdit, setSavingEdit] = useState(false);
 
@@ -53,7 +52,6 @@ export default function RoutesPage() {
       origin: route.origin || "",
       destination: route.destination || "",
       color: route.color || "#EFCC01",
-      strokeColor: route.strokeColor || "#2D1E2F",
     });
   };
 
@@ -68,7 +66,6 @@ export default function RoutesPage() {
         origin: editFormData.origin.trim(),
         destination: editFormData.destination.trim(),
         color: editFormData.color,
-        strokeColor: editFormData.strokeColor || "#2D1E2F",
       });
       setRouteToEdit(null);
       refresh();
@@ -248,17 +245,13 @@ export default function RoutesPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2.5">
                     <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-xs"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border border-[#2D1E2F]/20 shadow-xs"
                       style={{
                         backgroundColor: route.color || "#EFCC01",
-                        border: `2px solid ${route.strokeColor || "#2D1E2F"}`,
                       }}
-                      title={`Fondo: ${route.color || "#EFCC01"} | Borde: ${route.strokeColor || "#2D1E2F"}`}
+                      title={`Color de ruta: ${route.color || "#EFCC01"}`}
                     >
-                      <Bus
-                        className="w-4 h-4"
-                        style={{ color: route.strokeColor || "#2D1E2F" }}
-                      />
+                      <Bus className="w-4 h-4 text-[#2D1E2F]" />
                     </div>
                     <div>
                       <h3 className="text-[#2D1E2F] text-base font-semibold">
@@ -447,7 +440,7 @@ export default function RoutesPage() {
               <div>
                 <label className="block text-xs font-medium text-[#2D1E2F]/80 mb-1 flex items-center gap-1.5">
                   <Palette className="w-3.5 h-3.5 text-[#EFCC01]" />
-                  Color de Fondo de la Ruta
+                  Color de la Ruta
                 </label>
                 <div className="flex items-center gap-3">
                   <input
@@ -475,52 +468,10 @@ export default function RoutesPage() {
                       className="w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 rounded-xl pl-7 pr-3 py-2 text-xs font-mono text-[#2D1E2F] focus:outline-none focus:border-[#EFCC01]"
                     />
                   </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-[#2D1E2F]/80 mb-1 flex items-center gap-1.5">
-                  <Palette className="w-3.5 h-3.5 text-[#2D1E2F]" />
-                  Color del Borde e Ícono (Stroke)
-                </label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    value={editFormData.strokeColor}
-                    onChange={(e) =>
-                      setEditFormData((p) => ({ ...p, strokeColor: e.target.value }))
-                    }
-                    className="w-10 h-9 rounded-lg border border-[#2D1E2F]/15 cursor-pointer p-0.5 bg-[#FFF9D6]"
-                  />
-                  <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#2D1E2F]/40 text-xs font-mono">
-                      #
-                    </span>
-                    <input
-                      type="text"
-                      value={editFormData.strokeColor.replace("#", "")}
-                      maxLength={6}
-                      onChange={(e) => {
-                        const raw = e.target.value
-                          .replace(/[^0-9A-Fa-f]/g, "")
-                          .slice(0, 6);
-                        setEditFormData((p) => ({ ...p, strokeColor: `#${raw}` }));
-                      }}
-                      className="w-full bg-[#FFF9D6] border border-[#2D1E2F]/15 rounded-xl pl-7 pr-3 py-2 text-xs font-mono text-[#2D1E2F] focus:outline-none focus:border-[#EFCC01]"
-                    />
-                  </div>
                   <div
-                    className="w-9 h-9 rounded-lg shadow-xs shrink-0 flex items-center justify-center"
-                    style={{
-                      backgroundColor: editFormData.color,
-                      border: `2px solid ${editFormData.strokeColor}`,
-                    }}
-                  >
-                    <Bus
-                      className="w-4 h-4"
-                      style={{ color: editFormData.strokeColor }}
-                    />
-                  </div>
+                    className="w-9 h-9 rounded-lg border border-[#2D1E2F]/20 shadow-xs shrink-0"
+                    style={{ backgroundColor: editFormData.color }}
+                  />
                 </div>
               </div>
 

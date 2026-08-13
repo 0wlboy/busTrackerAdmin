@@ -134,46 +134,29 @@ export function useGetTracking() {
           let routeId = vehicleData?.routeId ?? null;
           let routeName = "Sin ruta asignada";
           let routeColor = "#EFCC01"; // default brand color
-          let routeStrokeColor = "#2D1E2F"; // default brand stroke
 
           if (routeId) {
-            // Usar caché solo si tiene tanto color como strokeColor explícitos.
-            if (routeCache.current[routeId]?.color && "strokeColor" in routeCache.current[routeId]) {
+            if (routeCache.current[routeId]?.color) {
               const cached = routeCache.current[routeId];
               routeName = cached.name;
               routeColor = cached.color;
-              routeStrokeColor = cached.strokeColor || "#2D1E2F";
-              console.log(`[tracking] Ruta ${routeId} — DESDE CACHE: color=${routeColor}, stroke=${routeStrokeColor}`);
             } else {
-              // Limpiar entrada de caché obsoleta si existe
-              delete routeCache.current[routeId];
               try {
                 const routeSnap = await getDoc(doc(db, "vehicleRoutes", routeId));
                 if (routeSnap.exists()) {
                   const routeData = routeSnap.data();
                   routeName = routeData.name ?? "Sin nombre de ruta";
                   const firestoreColor = routeData.color ?? null;
-                  // Leer strokeColor directamente; null = no está en Firestore
-                  const firestoreStroke = routeData.strokeColor ?? null;
-                  console.log(`[tracking] Ruta ${routeId} — FIRESTORE RAW: color=${firestoreColor}, strokeColor=${firestoreStroke}`);
-
-                  routeStrokeColor = firestoreStroke || "#2D1E2F";
 
                   if (firestoreColor) {
                     routeColor = firestoreColor;
-                    // Guardar en caché solo cuando tenemos todos los datos
                     routeCache.current[routeId] = {
                       name: routeName,
                       color: routeColor,
-                      strokeColor: routeStrokeColor,
                     };
-                    console.log(`[tracking] Ruta ${routeId} — CACHEADO: color=${routeColor}, stroke=${routeStrokeColor}`);
                   } else {
                     routeColor = "#EFCC01";
-                    console.warn(`[tracking] Ruta ${routeId} sin campo 'color' en Firestore. stroke=${routeStrokeColor}`);
                   }
-                } else {
-                  console.warn(`[tracking] Ruta ${routeId} no existe en vehicleRoutes.`);
                 }
               } catch (error) {
                 console.error("Error obteniendo ruta:", error);
@@ -194,7 +177,6 @@ export function useGetTracking() {
             id: routeId ?? "Sin ruta asignada",
             name: routeName ?? "Sin ruta asignada",
             color: routeColor,
-            strokeColor: routeStrokeColor,
           };
 
           return {
