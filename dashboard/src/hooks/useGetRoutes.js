@@ -35,6 +35,7 @@ export function useGetRoutes() {
         const vehiclesQuery = query(
           collection(db, "vehicles"),
           where("routeId", "==", routeId),
+          where("isDeleted", "==", false),
         );
         const vehiclesSnapshot = await getDocs(vehiclesQuery);
         totalVehicles = vehiclesSnapshot.size;
@@ -104,14 +105,18 @@ export function useGetRoutes() {
     color: r.color || "#EFCC01",
   }));
 
-  const topRoute = routes.length > 0
-    ? [...routes].reduce((max, r) => (r.totalVehicles > max.totalVehicles ? r : max), routes[0])
-    : null;
+  const topRoute =
+    routes.length > 0
+      ? [...routes].reduce(
+          (max, r) => (r.totalVehicles > max.totalVehicles ? r : max),
+          routes[0],
+        )
+      : null;
 
   return {
-    routes,      // Array completo con totalVehicles, activeVehicles, etc.
-    routeList,   // Array ligero { id, name } para filtros de UI
-    topRoute,    // Ruta con más vehículos registrados
+    routes, // Array completo con totalVehicles, activeVehicles, etc.
+    routeList, // Array ligero { id, name } para filtros de UI
+    topRoute, // Ruta con más vehículos registrados
     loading,
     error,
     refresh: fetchRoutes,

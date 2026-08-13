@@ -145,17 +145,23 @@ export function useGetTracking() {
                 const routeSnap = await getDoc(doc(db, "vehicleRoutes", routeId));
                 if (routeSnap.exists()) {
                   const routeData = routeSnap.data();
-                  routeName = routeData.name ?? "Sin nombre de ruta";
-                  const firestoreColor = routeData.color ?? null;
-
-                  if (firestoreColor) {
-                    routeColor = firestoreColor;
-                    routeCache.current[routeId] = {
-                      name: routeName,
-                      color: routeColor,
-                    };
-                  } else {
+                  if (routeData.isDeleted !== false) {
+                    routeId = null;
+                    routeName = "Sin ruta asignada";
                     routeColor = "#EFCC01";
+                  } else {
+                    routeName = routeData.name ?? "Sin nombre de ruta";
+                    const firestoreColor = routeData.color ?? null;
+
+                    if (firestoreColor) {
+                      routeColor = firestoreColor;
+                      routeCache.current[routeId] = {
+                        name: routeName,
+                        color: routeColor,
+                      };
+                    } else {
+                      routeColor = "#EFCC01";
+                    }
                   }
                 }
               } catch (error) {

@@ -182,7 +182,10 @@ export function usePaginatedVehicles({
               const routeDocRef = doc(db, "vehicleRoutes", vehicleData.routeId);
               const routeSnap = await getDoc(routeDocRef);
               if (routeSnap.exists()) {
-                routeName = routeSnap.data().name ?? null;
+                const rData = routeSnap.data();
+                if (rData.isDeleted === false) {
+                  routeName = rData.name ?? null;
+                }
               }
             } catch (_) {
               // Si falla la carga de ruta, se deja null

@@ -111,7 +111,7 @@ export default function RoutesPage() {
   };
 
   const filtered = routes.filter((r) => {
-    if (r.isDeleted === true) return false;
+    if (r.isDeleted !== false) return false;
 
     const routeName = r.name || "";
     const routeOrigin = r.origin || "";
